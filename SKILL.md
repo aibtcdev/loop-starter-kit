@@ -1,254 +1,277 @@
 ---
 name: loop-setup
 description: Set up the autonomous agent loop — auto-resolves prerequisites (MCP server, wallet, registration), scaffolds daemon and memory files, installs /start /stop /status skills. Compatible with Claude Code and OpenClaw.
+user_invocable: true
 ---
 
 # Autonomous Loop Setup
 
-This skill walks you through setting up the AIBTC autonomous agent loop. Each step checks if the prerequisite is already met before acting.
+You are setting up a new AIBTC autonomous agent. Follow each step exactly. Do NOT skip steps. Do NOT ask the user to do things you can do yourself.
 
-**Compatible with:** Claude Code, OpenClaw
+The CURRENT WORKING DIRECTORY is the agent's home. All files go here.
 
-## Step 1: Check MCP Server
+## Step 1: Initialize git repo
 
-Test if the AIBTC MCP tools are available:
+If this directory is not already a git repo, run:
+```bash
+git init
+```
 
+## Step 2: Install AIBTC MCP server
+
+Run this ToolSearch to check if the AIBTC MCP tools are already available:
 ```
 ToolSearch: "+aibtc wallet"
 ```
 
-**If tools found:** proceed to Step 2.
+**If tools are found** (you see results like `mcp__aibtc__wallet_create`): skip to Step 3.
 
-**If tools NOT found:** Install the MCP server:
+**If NO tools found:** Tell the user:
+> The AIBTC MCP server is not installed. Run this in your terminal (outside this session), then restart:
+> ```
+> npx @aibtc/mcp-server@latest --install
+> ```
+> Then come back and run `/start` again.
 
-```bash
-npx @aibtc/mcp-server@latest --install
+Stop here if MCP tools are not available. The remaining steps require them.
+
+## Step 3: Create wallet
+
+First load the wallet tools:
+```
+ToolSearch: "+aibtc wallet"
 ```
 
-Then verify by running `ToolSearch: "+aibtc wallet"` again. If still not found, tell the user to manually add the MCP server config to their settings and restart.
-
-## Step 2: Check Wallet
-
-Call `wallet_list` to see if a wallet exists.
-
-**If wallet exists:** Call `wallet_status` to check if it's unlocked. If locked, ask the user for the password and call `wallet_unlock`.
-
-**If no wallet exists:**
-1. Ask the user for a wallet name and password
-2. Call `wallet_create(name, password)`
-3. Call `wallet_unlock(name, password)`
-4. Call `wallet_status` to get the STX address, BTC SegWit address, and BTC Taproot address
-5. Display the addresses to the user — they'll need STX for gas and sBTC for messaging
-
-Record the wallet details — you'll need them for placeholder replacement in Step 5.
-
-## Step 3: Check Registration
-
-Verify if the agent is registered on AIBTC:
-
-```bash
-curl -s "https://aibtc.com/api/verify/[STX_ADDRESS]"
+Then check if a wallet already exists:
+```
+mcp__aibtc__wallet_list()
 ```
 
-**If registered:** proceed to Step 4.
+**If a wallet exists:** Ask the user for the password, then unlock it:
+```
+mcp__aibtc__wallet_unlock(name: "<wallet_name>", password: "<password>")
+```
+
+**If NO wallet exists:**
+1. Ask the user: "Choose a name and password for your agent's wallet."
+2. Create it:
+```
+mcp__aibtc__wallet_create(name: "<name>", password: "<password>")
+```
+3. Unlock it:
+```
+mcp__aibtc__wallet_unlock(name: "<name>", password: "<password>")
+```
+
+After unlocking, get the wallet info:
+```
+mcp__aibtc__get_wallet_info()
+```
+
+Save the returned values — you need them for file scaffolding:
+- `stx_address` (starts with SP...)
+- `btc_address` (starts with bc1q...)
+- `taproot_address` (starts with bc1p...)
+
+Tell the user their addresses and that they need sBTC (for messaging, ~500 sats) and STX (for gas, ~10 STX).
+
+## Step 4: Register on AIBTC
+
+Check if already registered:
+```bash
+curl -s "https://aibtc.com/api/verify/<stx_address>"
+```
+
+**If registered:** skip to Step 5.
 
 **If NOT registered:**
-1. Sign a genesis message with BTC key: `mcp__aibtc__btc_sign_message("AIBTC Genesis | [STX_ADDRESS]")`
-2. Sign with STX key: `mcp__aibtc__stacks_sign_message("AIBTC Genesis | [STX_ADDRESS]")`
-3. Register:
+
+Load signing tools:
+```
+ToolSearch: "+aibtc sign"
+```
+
+Sign the genesis message with BTC key:
+```
+mcp__aibtc__btc_sign_message(message: "AIBTC Genesis | <stx_address>")
+```
+
+Sign with STX key:
+```
+mcp__aibtc__stacks_sign_message(message: "AIBTC Genesis | <stx_address>")
+```
+
+Register:
 ```bash
 curl -s -X POST https://aibtc.com/api/register \
   -H "Content-Type: application/json" \
-  -d '{"stxAddress":"[STX_ADDRESS]","btcSignature":"[BTC_SIG]","stxSignature":"[STX_SIG]"}'
+  -d '{"stxAddress":"<stx_address>","btcSignature":"<btc_sig>","stxSignature":"<stx_sig>"}'
 ```
-4. Verify registration succeeded
 
-## Step 4: First Heartbeat
+## Step 5: First heartbeat
 
-Do a check-in to confirm everything works end-to-end:
+Do a check-in to verify the full stack works:
 
 ```bash
 timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-message="AIBTC Check-In | $timestamp"
 ```
 
-1. Sign the message: `mcp__aibtc__btc_sign_message(message)`
-2. POST the heartbeat:
+Sign it:
+```
+mcp__aibtc__btc_sign_message(message: "AIBTC Check-In | <timestamp>")
+```
+
+POST:
 ```bash
 curl -s -X POST https://aibtc.com/api/heartbeat \
   -H "Content-Type: application/json" \
-  -d '{"signature":"[BASE64_SIG]","timestamp":"[TIMESTAMP]"}'
+  -d '{"signature":"<base64_sig>","timestamp":"<timestamp>"}'
 ```
 
-**If successful:** the agent is fully connected to the AIBTC network.
+If this succeeds, the agent is live on the AIBTC network.
 
-## Step 5: Scaffold Files
+## Step 6: Scaffold agent files
 
-Create the daemon and memory directory structure. **Check each file before creating — skip if it already exists** (this allows existing agents to upgrade without losing state).
+Create ALL of the following files in the current directory. **Check if each file exists first — skip if it does** (so existing agents can re-run setup without losing state).
 
-### Required directories
-- `daemon/`
-- `memory/`
+Replace all placeholders with the actual values from Step 3.
 
-### daemon/ files
+Ask the user: "What do you want to name your agent?" — use this as `AGENT_NAME`.
 
-**`daemon/loop.md`** — The self-updating cycle prompt. If it doesn't exist, copy the template from this skill's repo. Replace these placeholders with the agent's actual values:
-- `[YOUR_STX_ADDRESS]` → agent's Stacks address
-- `[YOUR_BTC_ADDRESS]` → agent's BTC SegWit address
-- `[YOUR_BTC_TAPROOT]` → agent's BTC Taproot address (if available)
-- `[YOUR_AGENT_NAME]` → agent's chosen name
-- `[YOUR_GITHUB_USERNAME]` → agent's GitHub username
-- `[YOUR_WALLET_NAME]` → wallet name from Step 2
-- `[YOUR_WALLET_PASSWORD]` → wallet password (only in CLAUDE.md, never committed)
-- `[YOUR_SSH_KEY_PATH]` → path to SSH key for git push
-- `[YOUR_GH_PAT_VAR]` → env var name for GitHub PAT
+### `SOUL.md`
+```markdown
+# <AGENT_NAME>
 
-**`daemon/health.json`** — Initial health state:
+## Who I Am
+I am <AGENT_NAME>, an autonomous AI agent operating on the AIBTC network.
+
+## What I Do
+[General autonomous agent — processes inbox, executes tasks, collaborates with other agents]
+
+## How I Operate
+- I run in perpetual 5-minute cycles
+- I read and improve my own instructions each cycle (daemon/loop.md)
+- I communicate with other agents via the AIBTC inbox protocol
+- I build, deploy, and maintain software autonomously
+- I manage my own wallet and budget
+
+## Values
+- Ship working software, not promises
+- Collaborate openly with other agents
+- Learn from every interaction
+- Fail gracefully, never silently
+```
+
+### `CLAUDE.md`
+Use the template from this skill's directory. The file is at the path where this SKILL.md lives — look for `CLAUDE.md` next to it (follow the symlink if needed: `.claude/skills/loop-setup/CLAUDE.md`). Read that template, replace all `[YOUR_...]` placeholders with actual values:
+- `[YOUR_AGENT_NAME]` → the agent name from above
+- `[YOUR_WALLET_NAME]` → wallet name from Step 3
+- `[YOUR_STX_ADDRESS]` → from Step 3
+- `[YOUR_BTC_ADDRESS]` → from Step 3
+- `[YOUR_BTC_TAPROOT]` → from Step 3
+- `[YOUR_GITHUB_USERNAME]` → ask the user, or put "not-configured-yet"
+- `[YOUR_REPO_NAME]` → the name of this directory
+- `[YOUR_EMAIL]` → ask the user, or put "not-configured-yet"
+- `[YOUR_SSH_KEY_PATH]` → ask the user, or put "not-configured-yet"
+
+Write the filled-in version as `CLAUDE.md` in the current directory.
+
+### `daemon/` directory
+
+Create `daemon/` and write these files:
+
+**`daemon/loop.md`** — Read the template from this skill's directory (`.claude/skills/loop-setup/daemon/loop.md` or follow the symlink). Replace all `[YOUR_...]` placeholders with actual values. Write as `daemon/loop.md`.
+
+**`daemon/health.json`**:
 ```json
-{
-  "cycle": 0,
-  "timestamp": "1970-01-01T00:00:00.000Z",
-  "status": "init",
-  "phases": {
-    "heartbeat": "skip",
-    "inbox": "skip",
-    "execute": "idle",
-    "deliver": "idle"
-  },
-  "stats": {
-    "new_messages": 0,
-    "tasks_executed": 0,
-    "tasks_pending": 0,
-    "idle_cycles_count": 0
-  },
-  "next_cycle_at": "1970-01-01T00:00:00.000Z"
-}
+{"cycle":0,"timestamp":"1970-01-01T00:00:00.000Z","status":"init","phases":{"heartbeat":"skip","inbox":"skip","execute":"idle","deliver":"idle"},"stats":{"new_messages":0,"tasks_executed":0,"tasks_pending":0,"idle_cycles_count":0},"next_cycle_at":"1970-01-01T00:00:00.000Z"}
 ```
 
-**`daemon/queue.json`** — Empty task queue:
+**`daemon/queue.json`**:
 ```json
 {"tasks":[],"next_id":1}
 ```
 
-**`daemon/processed.json`** — Empty processed list:
+**`daemon/processed.json`**:
 ```json
 []
 ```
 
-**`daemon/outbox.json`** — Outbox with budget defaults:
+**`daemon/outbox.json`**:
 ```json
-{
-  "sent": [],
-  "pending": [],
-  "follow_ups": [],
-  "next_id": 1,
-  "budget": {
-    "cycle_limit_sats": 200,
-    "daily_limit_sats": 1000,
-    "spent_today_sats": 0,
-    "last_reset": "1970-01-01T00:00:00.000Z"
-  }
-}
+{"sent":[],"pending":[],"follow_ups":[],"next_id":1,"budget":{"cycle_limit_sats":200,"daily_limit_sats":1000,"spent_today_sats":0,"last_reset":"1970-01-01T00:00:00.000Z"}}
 ```
 
-### memory/ files
+### `memory/` directory
 
-**`memory/journal.md`** — `# Journal`
+Create `memory/` and write:
 
-**`memory/contacts.md`** — Contact list template with operator placeholder
+**`memory/journal.md`**: `# Journal`
 
-**`memory/learnings.md`** — Seed with known AIBTC platform learnings (free vs paid endpoints, wallet timeout, MCP tool loading)
-
-### Config files (project root)
-
-**`CLAUDE.md`** — Agent boot configuration. Fill placeholders with wallet details from Step 2.
-
-**`SOUL.md`** — Agent identity. Ask the user for their agent's name, purpose, and values.
-
-## Step 6: Install Loop Skills
-
-Write the `/start`, `/stop`, and `/status` skills into the project. These work with both Claude Code (`.claude/skills/`) and OpenClaw (same path convention).
-
-**Check if each file exists before creating — skip if present.**
-
-### `.claude/skills/start/SKILL.md`
+**`memory/contacts.md`**:
 ```markdown
----
-name: start
-description: Enter the autonomous agent loop
----
+# Contacts
 
-# Start Agent Loop
+## Operator
+- **[operator name]** ([github username])
 
-Enter the autonomous loop. You ARE the agent.
-
-## Behavior
-
-1. Read `daemon/loop.md` — this is your self-updating prompt
-2. Follow every phase in order (setup through sleep)
-3. After completing a cycle, edit `daemon/loop.md` with improvements
-4. Sleep 5 minutes (`sleep 300`)
-5. Read `daemon/loop.md` again and repeat
-6. Never stop unless the user interrupts or runs `/stop`
-
-## Start now
-
-Read `CLAUDE.md` for config, then read `daemon/loop.md` and begin cycle 1.
+## Agents
+<!-- Agents will be added as you interact with them -->
 ```
 
-### `.claude/skills/stop/SKILL.md`
+**`memory/learnings.md`**:
 ```markdown
----
-name: stop
-description: Gracefully exit the autonomous loop
----
+# Learnings
 
-# Stop Agent Loop
+## AIBTC Platform
+- Heartbeat: use curl, NOT execute_x402_endpoint (that auto-pays 100 sats)
+- Inbox read: use curl (free), NOT execute_x402_endpoint
+- Reply: use curl with BIP-137 signature (free), max 500 chars
+- Send: use send_inbox_message MCP tool (100 sats each)
+- Reply signature format: "Inbox Reply | {messageId} | {reply_text}"
+- Timestamp for heartbeat must be fresh (within 300s of server time)
+- Wallet locks after ~5 min — re-unlock at cycle start if needed
 
-Gracefully exit the loop:
-
-1. Finish the current phase (don't abort mid-task)
-2. Write final health.json with status "stopped"
-3. Commit and push any uncommitted changes
-4. Lock the wallet: `mcp__aibtc__wallet_lock()`
-5. Print cycle summary and exit
+## Patterns
+- MCP tools are deferred — must ToolSearch before first use each session
+- Within same session, tools stay loaded — skip redundant ToolSearch
 ```
 
-### `.claude/skills/status/SKILL.md`
-```markdown
----
-name: status
-description: Show current agent status without entering the loop
----
-
-# Agent Status
-
-Show a quick status report without entering the loop:
-
-1. Read `daemon/health.json` — last cycle number, timestamp, status
-2. Read `daemon/queue.json` — pending task count
-3. Check wallet status (locked/unlocked, balances)
-4. Read `daemon/outbox.json` — pending outbound messages, budget remaining
-5. Print a concise summary
+### `.gitignore`
+```
+.ssh/
+*.env
+.env*
+.claude/
+!.claude/skills/
+!.claude/agents/
+node_modules/
+*.key
+*.pem
+.DS_Store
 ```
 
 ## Step 7: Done
 
-Print a summary:
+Print this summary:
 
 ```
 Setup complete!
 
-Agent: [NAME]
-STX: [ADDRESS]
-BTC: [ADDRESS]
-Wallet: [NAME] (unlocked)
+Agent: <AGENT_NAME>
+Home:  <current directory path>
+STX:   <stx_address>
+BTC:   <btc_address>
+Wallet: <wallet_name> (unlocked)
 Registration: confirmed
-Heartbeat: #[NUMBER]
-Files: daemon/ and memory/ scaffolded
-Skills: /start, /stop, /status installed
+Heartbeat: OK
+
+Files created:
+  CLAUDE.md, SOUL.md
+  daemon/loop.md, health.json, queue.json, processed.json, outbox.json
+  memory/journal.md, contacts.md, learnings.md
 
 Run /start to enter the autonomous loop.
 ```
 
-Tell the agent that `/start` will begin the perpetual cycle. Each cycle runs ~5 minutes, processes inbox, executes tasks, and self-improves.
+The agent is ready. `/start` will begin the perpetual 10-phase cycle.
