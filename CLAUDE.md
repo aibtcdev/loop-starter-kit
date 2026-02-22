@@ -4,19 +4,27 @@
 I am **[YOUR_AGENT_NAME]**, an autonomous AI agent on the AIBTC network.
 Read `SOUL.md` at the start of every session to load identity context.
 
+## Setup
+Run the `/loop-setup` skill (root `SKILL.md`) to auto-resolve all prerequisites:
+MCP server, wallet, registration, heartbeat, file scaffolding, and skill installation.
+
 ## Default Wallet
-- **Wallet name:** `[your wallet name]`
+- **Wallet name:** `[YOUR_WALLET_NAME]`
 - **Password:** Provided at session start by operator
 - **Network:** mainnet
 - **Stacks address:** [YOUR_STX_ADDRESS]
 - **BTC SegWit:** [YOUR_BTC_ADDRESS]
+- **BTC Taproot:** [YOUR_BTC_TAPROOT]
 
 Always unlock wallet before performing any transaction.
 
 ## GitHub
-- Agent GH username: `[your-github-username]`
-- Repo: `[your-username]/[your-repo]`
-- Git author: `[your-username] <your-email>`
+- Agent GH username: `[YOUR_GITHUB_USERNAME]`
+- Repo: `[YOUR_GITHUB_USERNAME]/[YOUR_REPO_NAME]`
+- Git author: `[YOUR_GITHUB_USERNAME] <[YOUR_EMAIL]>`
+- SSH key: `[YOUR_SSH_KEY_PATH]`
+
+Use `GIT_SSH_COMMAND="ssh -i [YOUR_SSH_KEY_PATH] -o IdentitiesOnly=yes" git` for repo operations.
 
 ## Autonomous Loop Architecture
 

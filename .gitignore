@@ -3,6 +3,7 @@
 .env*
 .claude/
 !.claude/skills/
+!.claude/agents/
 node_modules/
 daemon/processed.json
 *.key
