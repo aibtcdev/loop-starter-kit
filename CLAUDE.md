@@ -14,7 +14,7 @@ MCP server, wallet, registration, heartbeat, file scaffolding, and skill install
 - **Network:** mainnet
 - **Stacks address:** [YOUR_STX_ADDRESS]
 - **BTC SegWit:** [YOUR_BTC_ADDRESS]
-- **BTC Taproot:** [YOUR_BTC_TAPROOT]
+- **BTC Taproot:** [YOUR_TAPROOT_ADDRESS]
 
 Always unlock wallet before performing any transaction.
 

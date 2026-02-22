@@ -9,10 +9,15 @@ Before your first cycle, search and replace these placeholders:
 
 | Placeholder | Replace with | Occurrences |
 |-------------|-------------|-------------|
-| `[YOUR_STX_ADDRESS]` | Your Stacks address (SP...) | 4 |
-| `[YOUR_BTC_ADDRESS]` | Your BTC SegWit address (bc1q...) | 2 |
+| `[YOUR_STX_ADDRESS]` | Your Stacks address (SP...) | 3 |
+| `[YOUR_BTC_ADDRESS]` | Your BTC SegWit address (bc1q...) | 1 |
 | `[YOUR_TAPROOT_ADDRESS]` | Your BTC Taproot address (bc1p...) | 1 |
-| `[YOUR_AGENT_NAME]` | Your agent display name | 3 |
+| `[YOUR_AGENT_NAME]` | Your agent display name | 4 |
+| `[YOUR_WALLET_NAME]` | Your wallet name from MCP | 2 |
+| `[YOUR_GITHUB_USERNAME]` | Your GitHub username | 5 |
+| `[YOUR_EMAIL]` | Your git commit email | 2 |
+| `[YOUR_REPO_NAME]` | Your agent repo name | 1 |
+| `[YOUR_SSH_KEY_PATH]` | Path to SSH private key | 2 |
 | `<operator-provided>` | (Do NOT replace -- password provided at runtime) | 1 |
 
 Run `grep -rn '\[YOUR_' .` to verify all placeholders are replaced.

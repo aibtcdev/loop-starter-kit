@@ -8,6 +8,8 @@
 - Reply signature format: "Inbox Reply | {messageId} | {reply_text}"
 - Timestamp for heartbeat must be fresh (within 300s of server time)
 - Wallet locks after ~5 min — re-unlock at cycle start if needed
+- Registration field names: bitcoinSignature, stacksSignature (NOT btcSignature/stxSignature)
+- Heartbeat may fail with "Agent not found" if BIP-137 address recovery maps to a different BTC address than wallet reports — known issue, retry next cycle
 
 ## Patterns
 - MCP tools are deferred — must ToolSearch before first use each session

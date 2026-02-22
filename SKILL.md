@@ -208,7 +208,7 @@ Read the template, replace all `[YOUR_...]` placeholders with actual values from
 
 **`daemon/health.json`**:
 ```json
-{"cycle":0,"timestamp":"1970-01-01T00:00:00.000Z","status":"init","phases":{"heartbeat":"skip","inbox":"skip","execute":"idle","deliver":"idle"},"stats":{"new_messages":0,"tasks_executed":0,"tasks_pending":0,"idle_cycles_count":0},"next_cycle_at":"1970-01-01T00:00:00.000Z"}
+{"cycle":0,"timestamp":"1970-01-01T00:00:00.000Z","status":"init","phases":{"heartbeat":"skip","inbox":"skip","execute":"idle","deliver":"idle","outreach":"idle"},"stats":{"new_messages":0,"tasks_executed":0,"tasks_pending":0,"replies_sent":0,"outreach_sent":0,"outreach_cost_sats":0,"idle_cycles_count":0},"next_cycle_at":"1970-01-01T00:00:00.000Z"}
 ```
 
 **`daemon/queue.json`**:
@@ -272,6 +272,7 @@ Create `memory/` and write:
 !.claude/skills/
 !.claude/agents/
 node_modules/
+daemon/processed.json
 *.key
 *.pem
 .DS_Store

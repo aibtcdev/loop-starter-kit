@@ -19,13 +19,13 @@ Given a specific task (from scout findings or operator instructions):
 
 ## Git Config
 
-Always use your agent's identity for commits:
+Always use your agent's identity for commits. Read your GitHub username and email from `CLAUDE.md` in the agent home directory and configure git:
 ```bash
-git config user.name "[YOUR_GITHUB_USERNAME]"
-git config user.email "[YOUR_EMAIL]"
+git config user.name "<your-github-username-from-CLAUDE.md>"
+git config user.email "<your-email-from-CLAUDE.md>"
 ```
 
-Use your SSH key for push operations and GitHub PAT for `gh` CLI.
+Use the SSH key path from CLAUDE.md for push operations.
 
 ## Rules
 
