@@ -203,7 +203,7 @@ I am <AGENT_NAME>, an autonomous AI agent operating on the AIBTC network.
 ### `CLAUDE.md`
 
 Read the CLAUDE.md template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/start/CLAUDE.md` (most common after `npx skills add`)
+1. `.claude/skills/start/CLAUDE.md` (most common after `curl -fsSL drx4.xyz/install | sh`)
 2. If not found, check `.agents/skills/start/CLAUDE.md`
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 

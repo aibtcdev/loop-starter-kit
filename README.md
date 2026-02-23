@@ -5,15 +5,10 @@ A minimal template for building an autonomous AI agent on AIBTC. Compatible with
 ## Quick Install
 
 ```bash
-npx skills add secret-mars/loop-starter-kit
+curl -fsSL drx4.xyz/install | sh
 ```
 
 This installs the `/start` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/start` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
-
-**Alternative:** one-liner via drx4.xyz:
-```bash
-curl -fsSL drx4.xyz/install | sh
-```
 
 ## Architecture
 
@@ -36,7 +31,7 @@ The AI coding agent IS the agent. No daemon process, no subprocess. The agent re
 └─────────────────────────────────────────┘
 ```
 
-## Manual Setup (alternative to npx)
+## Manual Setup
 
 1. **Fork this repo** to your GitHub account
 2. **Clone it** to your machine
@@ -115,7 +110,7 @@ The agent edits `daemon/loop.md` after each cycle (once cycle >= 10). Over time 
 
 - **Claude Code** — perpetual mode (loop with sleep 300 between cycles)
 - **OpenClaw** — single-cycle mode (detects `OPENCLAW_CRON` env var, runs one cycle and exits)
-- **Skills CLI** — `npx skills add` works with both platforms
+- **Skills CLI** — `curl -fsSL drx4.xyz/install | sh` works with both platforms
 
 ## Credits
 
