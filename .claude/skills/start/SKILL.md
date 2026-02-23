@@ -15,7 +15,7 @@ user_invocable: true
 
 | Component | Check | If missing |
 |-----------|-------|------------|
-| Node.js | source nvm if present, then `node --version` | → Setup Step 1b |
+| Node.js | `node --version` or `$HOME/.node/bin/node --version` | → Setup Step 1b |
 | Wallet | `mcp__aibtc__wallet_list()` | → Setup Step 3 |
 | Registration | `curl -s https://aibtc.com/api/verify/<stx_address>` | → Setup Step 4 |
 | `CLAUDE.md` | File exists? | → Setup Step 6 (CLAUDE.md only) |
@@ -42,9 +42,9 @@ git init
 
 ## Setup Step 1b: Ensure Node.js is installed
 
-Check if Node.js is available (source nvm first in case it was installed in a previous session):
+Check if Node.js is available:
 ```bash
-[ -s "$HOME/.nvm/nvm.sh" ] && \. "$HOME/.nvm/nvm.sh"; node --version
+node --version 2>/dev/null || { [ -x "$HOME/.node/bin/node" ] && export PATH="$HOME/.node/bin:$PATH" && node --version; }
 ```
 
 **If Node.js is found** (any version >= 18): skip to Step 2.
@@ -64,12 +64,10 @@ Verify it works:
 node --version && npx --version
 ```
 
-Persist PATH for future shells (write to `.profile` for login shells, and prepend to `.bashrc` before the non-interactive guard):
+Persist PATH for future shells:
 ```bash
 grep -q 'HOME/.node/bin' ~/.profile 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.profile
-if ! grep -q 'HOME/.node/bin' ~/.bashrc 2>/dev/null; then
-  sed -i '1i export PATH="$HOME/.node/bin:$PATH"' ~/.bashrc 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.zshrc
-fi
+grep -q 'HOME/.node/bin' ~/.zshrc 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.zshrc 2>/dev/null
 ```
 
 **If install fails** (no curl, network issues, etc): Tell the user:
