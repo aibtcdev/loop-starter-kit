@@ -295,6 +295,167 @@ Write to `memory/journal.md` when something meaningful happened or every 5th cyc
 
 Update `memory/learnings.md` when something failed or a new pattern was discovered.
 
+### 7d. Journal archiving — 1st of each month OR >500 lines
+
+Archive if today is the 1st of the month OR journal exceeds 500 lines:
+```bash
+line_count=$(wc -l < memory/journal.md)
+today=$(date -u +"%d")
+# Archive if >500 lines or 1st of month
+if [ "$line_count" -gt 500 ] || [ "$today" = "01" ]; then
+  archive_name="memory/journal-archive/$(date -u +%Y-%m-%d).md"
+  mkdir -p memory/journal-archive
+  mv memory/journal.md "$archive_name"
+  echo "# Journal\n\n> Archived to $archive_name on $(date -u +%Y-%m-%d)\n" > memory/journal.md
+fi
+```
+
+- Move current journal to `memory/journal-archive/YYYY-MM-DD.md`
+- Create a fresh `memory/journal.md` with a header and a reference to the archive
+
+### 7e. Outbox archiving — >50 sent entries
+
+When `daemon/outbox.json` sent array exceeds 50 items:
+- Determine the cutoff date: 7 days ago
+- Move entries older than 7 days from `sent` to `daemon/outbox-archive.json`
+- Keep only the last 7 days of sent messages in `daemon/outbox.json`
+- If `daemon/outbox-archive.json` does not exist, create it with `{"archived": []}`
+
+```python
+import json, os
+from datetime import datetime, timedelta, timezone
+
+cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+outbox_path = "daemon/outbox.json"
+archive_path = "daemon/outbox-archive.json"
+
+with open(outbox_path) as f:
+    outbox = json.load(f)
+
+sent = outbox.get("sent", [])
+if len(sent) > 50:
+    recent = [m for m in sent if datetime.fromisoformat(m.get("sent_at","1970-01-01T00:00:00+00:00").replace("Z","+00:00")) >= cutoff]
+    old = [m for m in sent if m not in recent]
+
+    if os.path.exists(archive_path):
+        with open(archive_path) as f:
+            archive = json.load(f)
+    else:
+        archive = {"archived": []}
+
+    archive["archived"].extend(old)
+    outbox["sent"] = recent
+
+    with open(archive_path, "w") as f:
+        json.dump(archive, f, indent=2)
+    with open(outbox_path, "w") as f:
+        json.dump(outbox, f, indent=2)
+```
+
+### 7f. Archive processed.json — >200 entries
+
+When `daemon/processed.json` exceeds 200 entries:
+- Keep only entries from the last 30 days
+- Archive older entries to `daemon/processed-archive.json`
+
+```python
+import json, os
+from datetime import datetime, timedelta, timezone
+
+cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+processed_path = "daemon/processed.json"
+archive_path = "daemon/processed-archive.json"
+
+with open(processed_path) as f:
+    processed = json.load(f)
+
+# processed.json may be a list of IDs or a dict with a "ids" key — adapt as needed
+entries = processed if isinstance(processed, list) else processed.get("ids", [])
+
+if len(entries) > 200:
+    # If entries are dicts with timestamps, filter by date; otherwise keep last 200
+    if entries and isinstance(entries[0], dict):
+        recent = [e for e in entries if datetime.fromisoformat(e.get("replied_at","1970-01-01T00:00:00+00:00").replace("Z","+00:00")) >= cutoff]
+        old = [e for e in entries if e not in recent]
+    else:
+        recent = entries[-200:]
+        old = entries[:-200]
+
+    if os.path.exists(archive_path):
+        with open(archive_path) as f:
+            archive = json.load(f)
+    else:
+        archive = {"archived": []}
+    archive["archived"].extend(old)
+
+    if isinstance(processed, list):
+        updated = recent
+    else:
+        processed["ids"] = recent
+        updated = processed
+
+    with open(archive_path, "w") as f:
+        json.dump(archive, f, indent=2)
+    with open(processed_path, "w") as f:
+        json.dump(updated, f, indent=2)
+```
+
+### 7g. Archive queue.json — >10 completed/failed tasks
+
+When `daemon/queue.json` has more than 10 completed or failed tasks:
+- Move completed/failed tasks older than 7 days to `daemon/queue-archive.json`
+- Keep pending, in_progress, and delegated tasks, plus recently completed/failed ones
+
+```python
+import json, os
+from datetime import datetime, timedelta, timezone
+
+cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+queue_path = "daemon/queue.json"
+archive_path = "daemon/queue-archive.json"
+
+with open(queue_path) as f:
+    queue = json.load(f)
+
+tasks = queue.get("tasks", [])
+done = [t for t in tasks if t.get("status") in ("completed","failed")]
+
+if len(done) > 10:
+    old_done = [t for t in done if datetime.fromisoformat(t.get("updated_at","1970-01-01T00:00:00+00:00").replace("Z","+00:00")) < cutoff]
+    keep = [t for t in tasks if t not in old_done]
+
+    if os.path.exists(archive_path):
+        with open(archive_path) as f:
+            archive = json.load(f)
+    else:
+        archive = {"archived": []}
+
+    archive["archived"].extend(old_done)
+    queue["tasks"] = keep
+
+    with open(archive_path, "w") as f:
+        json.dump(archive, f, indent=2)
+    with open(queue_path, "w") as f:
+        json.dump(queue, f, indent=2)
+```
+
+### 7h. Contacts archiving — >500 lines
+
+When `memory/contacts.md` exceeds 500 lines:
+- Identify dormant agents: no collaboration in the last 90 days and low interaction count
+- Move those entries to `memory/contacts-archive.md`
+- This keeps the active contacts list lean and context-efficient
+
+```bash
+line_count=$(wc -l < memory/contacts.md)
+if [ "$line_count" -gt 500 ]; then
+  # Review contacts manually or use a script to move dormant entries
+  # (agents with last_contact older than 90 days and no pending tasks)
+  # Append them to memory/contacts-archive.md and remove from contacts.md
+  echo "contacts.md has $line_count lines — review and archive dormant agents"
+fi
+```
+
 ## Phase 8: Evolve
 
 This is the key phase. Based on what happened this cycle:
