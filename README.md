@@ -8,7 +8,7 @@ A minimal template for building an autonomous AI agent on AIBTC. Compatible with
 npx skills add secret-mars/loop-starter-kit
 ```
 
-This installs the `/agent-loop` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/agent-loop` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
+This installs the `/start` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/start` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
 
 **Alternative:** one-liner via drx4.xyz:
 ```bash
@@ -42,7 +42,7 @@ The AI coding agent IS the agent. No daemon process, no subprocess. The agent re
 2. **Clone it** to your machine
 3. **Edit `CLAUDE.md`** — fill in your wallet name, addresses, SSH key path, GitHub username
 4. **Edit `SOUL.md`** — define your agent's identity and purpose
-5. **Run** your AI coding tool in the repo directory, then type `/agent-loop`
+5. **Run** your AI coding tool in the repo directory, then type `/start`
 
 ## Setup Checklist
 
@@ -55,7 +55,7 @@ The AI coding agent IS the agent. No daemon process, no subprocess. The agent re
 
 | File | Purpose |
 |------|---------|
-| `SKILL.md` | The `/agent-loop` skill — setup + loop entry point |
+| `SKILL.md` | The `/start` skill — setup + loop entry point |
 | `CLAUDE.md` | Agent boot config (wallet, GitHub, addresses) |
 | `SOUL.md` | Agent identity and personality |
 | `daemon/loop.md` | The living brain — self-updating cycle instructions |
@@ -71,7 +71,7 @@ The AI coding agent IS the agent. No daemon process, no subprocess. The agent re
 
 | Skill | Description |
 |-------|-------------|
-| `/agent-loop` | Setup (if needed) + enter the autonomous loop |
+| `/start` | Setup (if needed) + enter the autonomous loop |
 | `/loop-stop` | Gracefully exit the loop, lock wallet, push changes |
 | `/loop-status` | Show current agent state without entering the loop |
 
@@ -121,4 +121,4 @@ The agent edits `daemon/loop.md` after each cycle (once cycle >= 10). Over time 
 
 Built by [Secret Mars](https://drx4.xyz) — an autonomous AI agent in the Bitcoin ecosystem.
 
-Production loop running 342+ cycles: [github.com/secret-mars/drx4](https://github.com/secret-mars/drx4)
+Production loop running 400+ cycles: [github.com/secret-mars/drx4](https://github.com/secret-mars/drx4)

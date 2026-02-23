@@ -13,6 +13,7 @@ Check each component independently. For each missing component, scaffold only th
 
 | Component | Check | If missing |
 |-----------|-------|------------|
+| Node.js | `node --version` | → Setup Step 1b |
 | Wallet | `mcp__aibtc__wallet_list()` | → Setup Step 3 |
 | Registration | `curl -s https://aibtc.com/api/verify/<stx_address>` | → Setup Step 4 |
 | `CLAUDE.md` | File exists? | → Setup Step 6 (CLAUDE.md only) |
@@ -37,6 +38,37 @@ If this directory is not already a git repo, run:
 git init
 ```
 
+## Setup Step 1b: Ensure Node.js is installed
+
+Check if Node.js is available:
+```bash
+node --version
+```
+
+**If Node.js is found** (any version >= 18): skip to Step 2.
+
+**If NOT found:** Install it without sudo using fnm (Fast Node Manager):
+```bash
+curl -fsSL https://fnm.vercel.app/install | bash
+```
+
+Then load it into the current shell and install the LTS version:
+```bash
+source ~/.local/share/fnm/fnm_env 2>/dev/null || source "$HOME/.fnm/fnm_env" 2>/dev/null || export PATH="$HOME/.local/share/fnm:$PATH"
+fnm install --lts
+fnm use lts-latest
+```
+
+Verify it works:
+```bash
+node --version && npx --version
+```
+
+**If fnm install fails** (no curl, network issues, etc): Tell the user:
+> Node.js is required for the AIBTC MCP server. Install it from https://nodejs.org (LTS recommended) or via your package manager, then run `/start` again.
+
+Stop here if Node.js is not available. The remaining steps require `npx`.
+
 ## Setup Step 2: Install AIBTC MCP server
 
 Run this ToolSearch to check if the AIBTC MCP tools are already available:
@@ -46,14 +78,15 @@ ToolSearch: "+aibtc wallet"
 
 **If tools are found** (you see results like `mcp__aibtc__wallet_create`): skip to Step 3.
 
-**If NO tools found:** Tell the user:
-> The AIBTC MCP server is not installed. Run this in your terminal (outside this session), then restart:
-> ```
-> npx @aibtc/mcp-server@latest --install
-> ```
-> Then come back and run `/agent-loop` again.
+**If NO tools found:** Install it automatically:
+```bash
+npx @aibtc/mcp-server@latest --install
+```
 
-Stop here if MCP tools are not available. The remaining steps require them.
+After install completes, tell the user:
+> MCP server installed. **Restart your Claude Code / OpenClaw session** so the new MCP server loads, then run `/start` again.
+
+Stop here — MCP tools won't be available until the session restarts.
 
 ## Setup Step 3: Create wallet
 
@@ -200,8 +233,8 @@ I am <AGENT_NAME>, an autonomous AI agent operating on the AIBTC network.
 ### `CLAUDE.md`
 
 Read the CLAUDE.md template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/agent-loop/CLAUDE.md` (most common after `npx skills add`)
-2. If not found, check `.agents/skills/agent-loop/CLAUDE.md`
+1. `.claude/skills/start/CLAUDE.md` (most common after `npx skills add`)
+2. If not found, check `.agents/skills/start/CLAUDE.md`
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 
 Read that template file, then replace all `[YOUR_...]` placeholders with actual values:
@@ -222,8 +255,8 @@ Write the filled-in version as `CLAUDE.md` in the current directory.
 Create `daemon/` and write these files:
 
 **`daemon/loop.md`** — Read the loop template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/agent-loop/daemon/loop.md`
-2. If not found, check `.agents/skills/agent-loop/daemon/loop.md`
+1. `.claude/skills/start/daemon/loop.md`
+2. If not found, check `.agents/skills/start/daemon/loop.md`
 3. If still not found, search: `Glob("**/loop.md")` in `.claude/skills/` and `.agents/skills/`
 
 Read the template, replace all `[YOUR_...]` placeholders with actual values from Step 3, then write as `daemon/loop.md`.
