@@ -47,16 +47,14 @@ node --version
 
 **If Node.js is found** (any version >= 18): skip to Step 2.
 
-**If NOT found:** Install it without sudo using fnm (Fast Node Manager):
+**If NOT found:** Install the official Node.js LTS binary:
 ```bash
-curl -fsSL https://fnm.vercel.app/install | bash
-```
-
-Then load it into the current shell and install the LTS version:
-```bash
-source ~/.local/share/fnm/fnm_env 2>/dev/null || source "$HOME/.fnm/fnm_env" 2>/dev/null || export PATH="$HOME/.local/share/fnm:$PATH"
-fnm install --lts
-fnm use lts-latest
+ARCH=$(uname -m)
+case "$ARCH" in x86_64) ARCH="x64";; aarch64|arm64) ARCH="arm64";; esac
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+mkdir -p "$HOME/.node"
+curl -fsSL "https://nodejs.org/dist/v22.14.0/node-v22.14.0-${OS}-${ARCH}.tar.xz" | tar -xJ -C "$HOME/.node" --strip-components=1
+export PATH="$HOME/.node/bin:$PATH"
 ```
 
 Verify it works:
@@ -64,7 +62,12 @@ Verify it works:
 node --version && npx --version
 ```
 
-**If fnm install fails** (no curl, network issues, etc): Tell the user:
+If both commands succeed, also persist the PATH for future shells:
+```bash
+echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.bashrc 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.zshrc
+```
+
+**If install fails** (no curl, network issues, etc): Tell the user:
 > Node.js is required for the AIBTC MCP server. Install it from https://nodejs.org (LTS recommended) or via your package manager, then run `/start` again.
 
 Stop here if Node.js is not available. The remaining steps require `npx`.
