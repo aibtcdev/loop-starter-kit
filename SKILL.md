@@ -15,7 +15,6 @@ user_invocable: true
 
 | Component | Check | If missing |
 |-----------|-------|------------|
-| Node.js | `node --version` or `$HOME/.node/bin/node --version` | → Setup Step 1b |
 | Wallet | `mcp__aibtc__wallet_list()` | → Setup Step 3 |
 | Registration | `curl -s https://aibtc.com/api/verify/<stx_address>` | → Setup Step 4 |
 | `CLAUDE.md` | File exists? | → Setup Step 6 (CLAUDE.md only) |
@@ -40,41 +39,6 @@ If this directory is not already a git repo, run:
 git init
 ```
 
-## Setup Step 1b: Ensure Node.js is installed
-
-Check if Node.js is available:
-```bash
-node --version 2>/dev/null || { [ -x "$HOME/.node/bin/node" ] && export PATH="$HOME/.node/bin:$PATH" && node --version; }
-```
-
-**If Node.js is found** (any version >= 18): skip to Step 2.
-
-**If NOT found:** Install the official Node.js LTS binary:
-```bash
-ARCH=$(uname -m)
-case "$ARCH" in x86_64) ARCH="x64";; aarch64|arm64) ARCH="arm64";; esac
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-mkdir -p "$HOME/.node"
-curl -fsSL "https://nodejs.org/dist/v22.14.0/node-v22.14.0-${OS}-${ARCH}.tar.xz" | tar -xJ -C "$HOME/.node" --strip-components=1
-export PATH="$HOME/.node/bin:$PATH"
-```
-
-Verify it works:
-```bash
-node --version && npx --version
-```
-
-Persist PATH for future shells:
-```bash
-grep -q 'HOME/.node/bin' ~/.profile 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.profile
-grep -q 'HOME/.node/bin' ~/.zshrc 2>/dev/null || echo 'export PATH="$HOME/.node/bin:$PATH"' >> ~/.zshrc 2>/dev/null
-```
-
-**If install fails** (no curl, network issues, etc): Tell the user:
-> Node.js is required for the AIBTC MCP server. Install it from https://nodejs.org (LTS recommended) or via your package manager, then run `/start` again.
-
-Stop here if Node.js is not available. The remaining steps require `npx`.
-
 ## Setup Step 2: Install AIBTC MCP server
 
 Run this ToolSearch to check if the AIBTC MCP tools are already available:
@@ -88,21 +52,6 @@ ToolSearch: "+aibtc wallet"
 ```bash
 npx @aibtc/mcp-server@latest --install
 ```
-
-After install, patch `.mcp.json` so the MCP server can find `npx` on restart. The installer writes `"command": "npx"` (bare), which fails if `$HOME/.node/bin` isn't on the system PATH. Fix it by using the absolute path:
-```bash
-NPX_PATH=$(which npx)
-if [ -f .mcp.json ] && [ -n "$NPX_PATH" ]; then
-  sed -i "s|\"command\": \"npx\"|\"command\": \"$NPX_PATH\"|" .mcp.json
-fi
-```
-
-Verify the fix:
-```bash
-cat .mcp.json
-```
-
-The `"command"` field should now show the full path (e.g. `"/root/.node/bin/npx"` or `"/home/user/.node/bin/npx"`).
 
 After install completes, tell the user:
 > MCP server installed. **Restart your Claude Code / OpenClaw session** so the new MCP server loads, then run `/start` again.
