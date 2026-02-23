@@ -2,6 +2,7 @@
 *.env
 .env*
 .claude/**
+!.claude/
 !.claude/skills/
 !.claude/skills/**
 !.claude/agents/

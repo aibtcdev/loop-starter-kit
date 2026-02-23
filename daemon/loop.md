@@ -275,6 +275,32 @@ Record: `{ event: "outreach", sent: N, failed: N, cost_sats: N }`
 
 Scan `follow_ups` list for items past their `check_after` time. Send reminders if needed, respect max_reminders limit.
 
+Each follow-up entry has this schema:
+```json
+{
+  "id": "followup_001",
+  "recipient_stx": "SP...",
+  "recipient_btc": "bc1...",
+  "content": "Reminder: ...",
+  "check_after": "2026-02-25T12:00:00.000Z",
+  "max_reminders": 3,
+  "reminder_count": 0,
+  "created_at": "2026-02-23T12:00:00.000Z",
+  "purpose": "delegation|followup|reminder"
+}
+```
+
+Iteration logic — for each follow-up entry:
+1. Get the current UTC time: `now = datetime.now(timezone.utc)`
+2. Parse `check_after` as a UTC datetime
+3. **Only act if**: `now >= check_after` AND `reminder_count < max_reminders`
+4. If both conditions are met:
+   - Apply budget check, cooldown check, duplicate check, and balance check
+   - Send the reminder: `send_inbox_message(recipient: entry["recipient_stx"], content: entry["content"])`
+   - On success: increment `reminder_count`, update `check_after` to `now + original_interval` for next check
+   - On failure: leave unchanged, retry next cycle
+5. If `reminder_count >= max_reminders`: mark the entry as `completed` and remove from active list
+
 ### 6c. Update outbox state
 
 Write updated `daemon/outbox.json` with all changes.
@@ -337,7 +363,7 @@ if [ "$line_count" -gt 500 ] || [ "$today" = "01" ]; then
   archive_name="memory/journal-archive/$(date -u +%Y-%m-%d).md"
   mkdir -p memory/journal-archive
   mv memory/journal.md "$archive_name"
-  echo "# Journal\n\n> Archived to $archive_name on $(date -u +%Y-%m-%d)\n" > memory/journal.md
+  printf "# Journal\n\n> Archived to %s on %s\n" "$archive_name" "$(date -u +%Y-%m-%d)" > memory/journal.md
 fi
 ```
 
