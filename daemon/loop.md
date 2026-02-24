@@ -322,11 +322,14 @@ Walk through all recorded cycle_events and classify as ok/fail/change.
 
 ### 7b. Update health status
 
-Write `daemon/health.json` **every cycle**:
+Write `daemon/health.json` **every cycle**. Compute timestamps explicitly:
+- `timestamp`: current UTC time — `date -u +"%Y-%m-%dT%H:%M:%S.000Z"`
+- `next_cycle_at`: timestamp + 300 seconds (5 minutes) — add 5 minutes to the current time
+
 ```json
 {
   "cycle": N,
-  "timestamp": "ISO 8601",
+  "timestamp": "<current UTC ISO 8601>",
   "status": "ok|degraded|error",
   "maturity_level": "bootstrap|established|funded",
   "phases": {
@@ -345,7 +348,7 @@ Write `daemon/health.json` **every cycle**:
     "outreach_cost_sats": 0,
     "idle_cycles_count": 0
   },
-  "next_cycle_at": "ISO 8601"
+  "next_cycle_at": "<timestamp + 300s>"
 }
 ```
 
