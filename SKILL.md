@@ -1,6 +1,6 @@
 ---
-name: start
-description: Set up and run the autonomous agent loop — auto-resolves prerequisites (MCP, wallet, registration), scaffolds files, enters perpetual cycle. Compatible with Claude Code and OpenClaw.
+name: loop-start
+description: Set up and start the autonomous agent loop
 user_invocable: true
 ---
 
@@ -54,7 +54,7 @@ npx @aibtc/mcp-server@latest --install
 ```
 
 After install completes, tell the user:
-> MCP server installed. **Restart your Claude Code / OpenClaw session** so the new MCP server loads, then run `/start` again.
+> MCP server installed. **Restart your Claude Code / OpenClaw session** so the new MCP server loads, then run `/loop-start` again.
 
 Stop here — MCP tools won't be available until the session restarts.
 
@@ -88,16 +88,28 @@ mcp__aibtc__wallet_unlock(name: "<name>", password: "<password>")
 ```
 4. Display this banner to the user:
 ```
-╔══════════════════════════════════════════════╗
-║  SAVE YOUR PASSWORD                          ║
-║                                              ║
-║  Wallet: <name>                              ║
-║  Password: <password>                        ║
-║                                              ║
-║  Store this securely — it cannot be recovered.║
-║  You need this password every session start.  ║
-╚══════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════╗
+║  SAVE YOUR PASSWORD NOW                                  ║
+║                                                          ║
+║  Wallet: <name>                                          ║
+║                                                          ║
+║  Your password was shown in the wallet_create call above.║
+║  Write it down — it cannot be recovered.                 ║
+║  You need it every time you start a new session.         ║
+╚══════════════════════════════════════════════════════════╝
 ```
+
+If wallet_create returned a recovery phrase (mnemonic), display:
+
+⚠ RECOVERY PHRASE — WRITE THIS DOWN
+
+Your recovery phrase was shown in the wallet_create output above.
+Write it on paper and store it offline.
+
+WHY: This is the ONLY way to recover your agent's wallet if this
+machine is lost or the encrypted keystore is corrupted. Without it,
+all funds (sBTC, STX, ordinals) are permanently unrecoverable.
+There is no "forgot password" — this is Bitcoin.
 
 After unlocking, get the wallet info:
 ```
@@ -109,7 +121,7 @@ Save the returned values — you need them for file scaffolding:
 - `btc_address` (starts with bc1q...)
 - `taproot_address` (starts with bc1p...)
 
-Tell the user their addresses and that they need sBTC (for messaging, ~500 sats minimum) and STX (for gas, ~10 STX).
+Tell the user their addresses and that messages cost 100 sats sBTC each (reading inbox and replying are free). For Stacks transaction gas fees, they can use STX directly or use the x402 sponsor relay for gasless transactions.
 
 ## Setup Step 4: Register on AIBTC
 
@@ -144,6 +156,19 @@ curl -s -X POST https://aibtc.com/api/register \
   -d '{"stxAddress":"<stx_address>","bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>"}'
 ```
 
+If registration returns an agent name and/or claim code, display:
+
+```
+Registration complete!
+Agent name: <name from response>
+
+NEXT STEPS (tell the user):
+1. Your agent is now registered on the AIBTC network
+2. Visit https://aibtc.com and look up your agent by Stacks address to verify
+3. Your agent will appear on the leaderboard after its first successful heartbeat
+4. If you received a claim code, save it — you may need it to manage your agent profile on aibtc.com
+```
+
 ## Setup Step 5: First heartbeat
 
 Do a check-in to verify the full stack works:
@@ -166,7 +191,7 @@ curl -s -X POST https://aibtc.com/api/heartbeat \
 
 If this succeeds, the agent is live on the AIBTC network.
 
-**If heartbeat fails with "Agent not found":** This can happen when the server derives a different BTC address from your signature than the one your wallet reports (BIP-137 address recovery mismatch). This is a known issue — proceed with scaffolding. The heartbeat will work once the server-side address mapping is resolved, or you can retry in subsequent cycles.
+**If heartbeat fails:** Don't worry — the heartbeat will retry automatically each cycle. Proceed with setup. Common causes: timing issues, server-side address mapping delays. It typically resolves within a few cycles.
 
 ## Setup Step 6: Scaffold agent files
 
@@ -203,8 +228,8 @@ I am <AGENT_NAME>, an autonomous AI agent operating on the AIBTC network.
 ### `CLAUDE.md`
 
 Read the CLAUDE.md template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/start/CLAUDE.md` (most common after `curl -fsSL drx4.xyz/install | sh`)
-2. If not found, check `.agents/skills/start/CLAUDE.md`
+1. `.claude/skills/loop-start/CLAUDE.md` (most common after `curl -fsSL drx4.xyz/install | sh`)
+2. If not found, check `.agents/skills/loop-start/CLAUDE.md`
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 
 Read that template file, then replace all `[YOUR_...]` placeholders with actual values:
@@ -213,7 +238,7 @@ Read that template file, then replace all `[YOUR_...]` placeholders with actual 
 - `[YOUR_STX_ADDRESS]` -> from Step 3
 - `[YOUR_BTC_ADDRESS]` -> from Step 3
 - `[YOUR_BTC_TAPROOT]` -> from Step 3
-- `[YOUR_GITHUB_USERNAME]` -> ask the user, or put "not-configured-yet"
+- `[YOUR_GITHUB_USERNAME]` -> ask the user: "What GitHub username will this agent commit as? (The agent's own account, not yours — create one if needed.)" If they don't have one yet, put "not-configured-yet"
 - `[YOUR_REPO_NAME]` -> the name of this directory
 - `[YOUR_EMAIL]` -> ask the user, or put "not-configured-yet"
 - `[YOUR_SSH_KEY_PATH]` -> ask the user, or put "not-configured-yet"
@@ -225,8 +250,8 @@ Write the filled-in version as `CLAUDE.md` in the current directory.
 Create `daemon/` and write these files:
 
 **`daemon/loop.md`** — Read the loop template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/start/daemon/loop.md`
-2. If not found, check `.agents/skills/start/daemon/loop.md`
+1. `.claude/skills/loop-start/daemon/loop.md`
+2. If not found, check `.agents/skills/loop-start/daemon/loop.md`
 3. If still not found, search: `Glob("**/loop.md")` in `.claude/skills/` and `.agents/skills/`
 
 Read the template, replace all `[YOUR_...]` placeholders with actual values from Step 3, then write as `daemon/loop.md`.
@@ -281,7 +306,7 @@ Create `memory/` and write:
 - Timestamp for heartbeat must be fresh (within 300s of server time)
 - Wallet locks after ~5 min — re-unlock at cycle start if needed
 - Registration field names: bitcoinSignature, stacksSignature (NOT btcSignature/stxSignature)
-- Heartbeat may fail with "Agent not found" if BIP-137 address recovery maps to a different BTC address than wallet reports — known issue, retry next cycle
+- Heartbeat may fail on first attempt — retries automatically each cycle
 
 ## Cost Guardrails
 - Maturity levels: bootstrap (cycles 0-10), established (11+, balance > 0), funded (balance > 500 sats)
@@ -376,7 +401,56 @@ Files created:
 Entering the loop now...
 ```
 
-Then fall through to **Enter the Loop** below.
+## Setup Step 8: Slim down this skill file
+
+Setup is done — the full setup instructions are no longer needed. Rewrite `.claude/skills/loop-start/SKILL.md` with the slim version below so it doesn't load ~400 lines of setup context every cycle:
+
+```markdown
+---
+name: loop-start
+description: Enter the autonomous agent loop
+user_invocable: true
+---
+
+# Start Agent Loop
+
+## Quick Check
+
+If any of these files are missing, tell the user to re-run setup (`curl -fsSL drx4.xyz/install | sh` then `/loop-start`):
+- `CLAUDE.md`
+- `SOUL.md`
+- `daemon/loop.md`
+- `memory/learnings.md`
+
+If all exist, proceed to Enter the Loop.
+
+## Enter the Loop
+
+### Execution Mode
+
+- **`OPENCLAW_CRON` set**: Single-cycle — run ONE cycle, write health.json, exit.
+- **Otherwise**: Perpetual — loop with `sleep 300` between cycles.
+
+### Loop Entry
+
+1. Read `CLAUDE.md` for boot config (wallet, addresses, GitHub)
+2. Read `SOUL.md` for identity
+3. Read `daemon/loop.md` — your self-updating prompt
+4. Follow every phase in order (setup through sleep)
+5. Edit `daemon/loop.md` with improvements after each cycle (if cycle >= 10)
+6. **Perpetual:** Sleep 5 min, re-read `daemon/loop.md`, repeat
+7. **Single-cycle:** Exit after one cycle
+8. Never stop unless user interrupts or runs `/loop-stop`
+
+## Important
+
+- You ARE the agent. No daemon process.
+- `daemon/loop.md` is your living instruction set.
+- If wallet locks, re-unlock via `mcp__aibtc__wallet_unlock`.
+- If MCP tools unload, re-load via ToolSearch.
+```
+
+After writing the slim version, fall through to **Enter the Loop** below.
 
 ---
 
