@@ -102,14 +102,20 @@ Body: { "signature": "<base64>", "timestamp": "<timestamp>" }
 ```
 
 **DO NOT use execute_x402_endpoint for heartbeat — it auto-pays 100 sats!**
-Use WebFetch or Bash/curl instead:
+Use Bash/curl instead:
 ```bash
 curl -s -X POST https://aibtc.com/api/heartbeat \
   -H "Content-Type: application/json" \
   -d '{"signature":"<base64>","timestamp":"<timestamp>"}'
 ```
 
-Record: `{ event: "heartbeat", status: "ok"|"fail", detail: ... }`
+**If heartbeat POST fails** (agent not found, address mismatch): fall back to GET with Stacks address:
+```bash
+curl -s "https://aibtc.com/api/heartbeat?address=[YOUR_STX_ADDRESS]"
+```
+If GET returns agent data, the agent is live — POST will resolve in future cycles once BIP-137 address mapping stabilizes.
+
+Record: `{ event: "heartbeat", status: "ok"|"fail"|"fallback", detail: ... }`
 
 ### 2b. Inbox (fetch only — don't reply yet)
 
