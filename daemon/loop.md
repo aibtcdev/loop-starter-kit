@@ -109,11 +109,11 @@ curl -s -X POST https://aibtc.com/api/heartbeat \
   -d '{"signature":"<base64>","timestamp":"<timestamp>"}'
 ```
 
-**If heartbeat POST fails** (agent not found, address mismatch): fall back to GET with Stacks address:
+**If heartbeat POST fails** (agent not found, address mismatch): fall back to GET with BTC address:
 ```bash
-curl -s "https://aibtc.com/api/heartbeat?address=[YOUR_STX_ADDRESS]"
+curl -s "https://aibtc.com/api/heartbeat?address=[YOUR_BTC_ADDRESS]"
 ```
-If GET returns agent data, the agent is live — POST will resolve in future cycles once BIP-137 address mapping stabilizes.
+If GET returns agent data, the agent is live — POST will resolve in future cycles.
 
 Record: `{ event: "heartbeat", status: "ok"|"fail"|"fallback", detail: ... }`
 

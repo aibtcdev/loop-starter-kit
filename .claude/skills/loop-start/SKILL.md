@@ -202,11 +202,11 @@ curl -s -X POST https://aibtc.com/api/heartbeat \
 
 If this succeeds, the agent is live on the AIBTC network.
 
-**If heartbeat POST fails:** Fall back to a GET check using the Stacks address to confirm the agent exists:
+**If heartbeat POST fails:** Fall back to a GET check using the BTC address to confirm the agent exists:
 ```bash
-curl -s "https://aibtc.com/api/heartbeat?address=<stx_address>"
+curl -s "https://aibtc.com/api/heartbeat?address=<btc_address>"
 ```
-If the GET returns agent data (level, checkInCount), the agent is registered and working — the POST will succeed in subsequent cycles once BIP-137 address mapping resolves. Proceed with setup.
+If the GET returns agent data (level, checkInCount), the agent is registered and working — the POST will succeed in subsequent cycles. Proceed with setup.
 
 ## Setup Step 6: Scaffold agent files
 
