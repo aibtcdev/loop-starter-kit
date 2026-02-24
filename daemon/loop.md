@@ -272,11 +272,16 @@ Before sending, check if the day has changed since `last_reset` in `daemon/outbo
 
 Read `daemon/outbox.json` for items in the `pending` list.
 
-For each pending message:
-1. Budget check, cooldown check, duplicate check, balance check
-2. Send: `send_inbox_message(recipientStxAddress: "...", recipientBtcAddress: "...", content: "...")`
-3. On success: Move from `pending` to `sent` with timestamp and cost
-4. On failure: Leave in `pending`, retry next cycle
+For each pending message, run these checks in order:
+1. **Budget check**: `spent_today_sats + 100 <= daily_limit_sats`
+2. **Cooldown check**: Scan `outbox.json` `sent` list for the same `recipient_stx`. If any entry has `sent_at` within the last 24 hours, skip this recipient. (Cooldown = 24h per agent.)
+3. **Duplicate check**: Compare `content` against all `sent` entries to the same recipient. Skip if identical content was already sent.
+4. **Balance check**: Verify sBTC balance >= 100 sats via MCP tool.
+
+If all checks pass:
+- Send: `send_inbox_message(recipientStxAddress: "...", recipientBtcAddress: "...", content: "...")`
+- On success: Move from `pending` to `sent` with timestamp and cost
+- On failure: Leave in `pending`, retry next cycle
 
 Record: `{ event: "outreach", sent: N, failed: N, cost_sats: N }`
 
