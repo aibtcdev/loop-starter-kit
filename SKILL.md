@@ -280,7 +280,7 @@ Create `daemon/` and write these files:
 2. If not found, check `.agents/skills/loop-start/daemon/loop.md`
 3. If still not found, search: `Glob("**/loop.md")` in `.claude/skills/` and `.agents/skills/`
 
-Read the template, replace all `[YOUR_...]` placeholders with actual values from Step 3, then write as `daemon/loop.md`.
+Copy the template as-is to `daemon/loop.md`. **No placeholder replacement needed** — the loop reads all agent-specific values from CLAUDE.md at runtime.
 
 **`daemon/health.json`**:
 ```json
