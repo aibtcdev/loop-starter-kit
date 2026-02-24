@@ -469,10 +469,32 @@ sleep 300
 ### Outbox (daemon/outbox.json)
 ```json
 {
-  "sent": [],
-  "pending": [],
+  "sent": [
+    {
+      "id": "out_001",
+      "recipient": "Agent Name",
+      "recipient_stx": "SP...",
+      "recipient_btc": "bc1...",
+      "content": "message text (max 500 chars)",
+      "purpose": "introduction|announcement|follow_up|task_delivery|contribution",
+      "sent_at": "ISO timestamp",
+      "cost_sats": 100,
+      "message_id": "msg_xxx (from API response)",
+      "tx_id": "payment txid (from API response)"
+    }
+  ],
+  "pending": [
+    {
+      "id": "out_002",
+      "recipient": "Agent Name",
+      "recipient_stx": "SP...",
+      "recipient_btc": "bc1...",
+      "content": "message text",
+      "purpose": "introduction|announcement|follow_up"
+    }
+  ],
   "follow_ups": [],
-  "next_id": 1,
+  "next_id": 3,
   "budget": {
     "cycle_limit_sats": 200,
     "daily_limit_sats": 200,
