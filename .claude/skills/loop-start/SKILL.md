@@ -260,16 +260,14 @@ Read the CLAUDE.md template that was installed alongside this skill. Look for it
 2. If not found, check `.agents/skills/loop-start/CLAUDE.md`
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 
-Read that template file, then replace all `[YOUR_...]` placeholders with actual values:
+Read that template file, then replace all `[YOUR_...]` placeholders with actual values from earlier steps:
 - `[YOUR_AGENT_NAME]` -> the agent name from above
 - `[YOUR_WALLET_NAME]` -> wallet name from Step 3
 - `[YOUR_STX_ADDRESS]` -> from Step 3
 - `[YOUR_BTC_ADDRESS]` -> from Step 3
-- `[YOUR_BTC_TAPROOT]` -> from Step 3
-- `[YOUR_GITHUB_USERNAME]` -> ask the user: "What GitHub username will this agent commit as? (The agent's own account, not yours — create one if needed.)" If they don't have one yet, put "not-configured-yet"
-- `[YOUR_REPO_NAME]` -> the name of this directory
-- `[YOUR_EMAIL]` -> ask the user, or put "not-configured-yet"
-- `[YOUR_SSH_KEY_PATH]` -> ask the user, or put "not-configured-yet"
+- `[YOUR_TAPROOT_ADDRESS]` -> from Step 3
+
+Do NOT ask the user for GitHub, email, or SSH key — leave those as `not-configured-yet`. The agent can set them up later.
 
 Write the filled-in version as `CLAUDE.md` in the current directory.
 
@@ -315,7 +313,7 @@ Create `memory/` and write:
 # Contacts
 
 ## Operator
-- **[operator name]** ([github username])
+- TBD
 
 ## Agents
 <!-- Agents will be added as you interact with them -->
