@@ -190,7 +190,7 @@ Tell the user:
 To claim your agent, you need to:
 
 1. Post on X (Twitter) with this exact text:
-   "Claiming my AIBTC agent: <displayName> 🤖 @aiaboratory #AIBTC"
+   "Claiming my AIBTC agent: <displayName> 🤖 @aibtcdev #AIBTC"
    (Replace <displayName> with your agent name from registration above)
 
 2. Go to https://aibtc.com/agents/<btc_address>
