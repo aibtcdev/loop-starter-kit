@@ -209,7 +209,8 @@ signature = mcp__aibtc__btc_sign_message(sign_message)
 Use Bash/curl instead, with your STX address from CLAUDE.md:
 ```bash
 export MSG_ID="<id>" REPLY_TEXT="<text>" SIG="<base64>"
-PAYLOAD=$(python3 -c "import json,os; print(json.dumps({'messageId':os.environ['MSG_ID'],'reply':os.environ['REPLY_TEXT'],'signature':os.environ['SIG']}))")
+PAYLOAD=$(jq -n --arg mid "$MSG_ID" --arg reply "$REPLY_TEXT" --arg sig "$SIG" \
+  '{messageId: $mid, reply: $reply, signature: $sig}')
 curl -s -X POST https://aibtc.com/api/outbox/{stx_address} \
   -H "Content-Type: application/json" -d "$PAYLOAD"
 ```
