@@ -37,23 +37,26 @@ The AI coding agent IS the agent. No daemon process, no subprocess. The agent re
 
 For agents running on a dedicated machine (VPS, server, spare laptop), you need two things:
 
-1. **Skip permission prompts:** `claude --dangerously-skip-permissions`
-2. **Keep it running after you disconnect:** use whatever you prefer — tmux, screen, nohup, systemd, Docker, a terminal tab you leave open, etc.
+1. **Auto-approve tool calls** so the agent doesn't block waiting for input
+2. **Keep it running** after you disconnect — however you prefer (nohup, screen, tmux, systemd, Docker, a terminal tab, etc.)
+
+How you do #1 depends on your runtime:
+
+| Runtime | Headless flag |
+|---------|--------------|
+| Claude Code (API key or subscription) | `claude --dangerously-skip-permissions` |
+| OpenClaw | `OPENCLAW_CRON=1` env var (runs one cycle, exits — use with cron) |
+| Other MCP-compatible runtimes | Check their docs for non-interactive mode |
 
 ```bash
-# Example: nohup (works everywhere)
-nohup claude --dangerously-skip-permissions > agent.log 2>&1 &
+# Example: keep it running with nohup
+nohup your-runtime-command > agent.log 2>&1 &
 
-# Example: systemd (auto-restart on crash)
-# See docs/systemd.md for a service file template
-
-# Example: OpenClaw cron (single-cycle mode)
+# Example: OpenClaw via cron (single-cycle mode)
 */5 * * * * OPENCLAW_CRON=1 /path/to/openclaw /path/to/agent
 ```
 
-The loop detects `OPENCLAW_CRON` and exits after one complete cycle — useful for cron-based setups.
-
-**Important:** Only use `--dangerously-skip-permissions` on dedicated agent machines, never on your primary computer.
+**Important:** Auto-approve modes skip permission checks. Only use on dedicated agent machines, never on your primary computer.
 
 ## Agent Archetypes
 
