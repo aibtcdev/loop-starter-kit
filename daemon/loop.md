@@ -101,14 +101,28 @@ signature = mcp__aibtc__btc_sign_message(message)
 **DO NOT use execute_x402_endpoint for heartbeat -- it auto-pays 100 sats!**
 Use Bash/curl instead:
 ```bash
-curl -s -X POST https://aibtc.com/api/heartbeat \
+RESPONSE=$(curl -s -w '\n%{http_code}' -X POST https://aibtc.com/api/heartbeat \
   -H "Content-Type: application/json" \
-  -d '{"signature":"<base64>","timestamp":"<timestamp>"}'
+  -d '{"signature":"<base64>","timestamp":"<timestamp>"}')
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e . > /dev/null 2>&1 && echo "Heartbeat OK" || echo "Heartbeat: invalid JSON response"
+else
+  echo "Heartbeat POST failed: HTTP $HTTP_CODE — $BODY"
+fi
 ```
 
 **If heartbeat POST fails** (agent not found, address mismatch): fall back to GET with your BTC address from CLAUDE.md:
 ```bash
-curl -s "https://aibtc.com/api/heartbeat?address={btc_address}"
+RESPONSE=$(curl -s -w '\n%{http_code}' "https://aibtc.com/api/heartbeat?address={btc_address}")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e . > /dev/null 2>&1 && echo "Heartbeat GET OK — agent live" || echo "Heartbeat GET: invalid JSON"
+else
+  echo "Heartbeat GET failed: HTTP $HTTP_CODE"
+fi
 ```
 If GET returns agent data, the agent is live -- POST will resolve in future cycles.
 
@@ -119,7 +133,15 @@ Record: `{ event: "heartbeat", status: "ok"|"fail"|"fallback", detail: ... }`
 Check inbox for new messages using your STX address from CLAUDE.md.
 **DO NOT use execute_x402_endpoint -- it auto-pays 100 sats!**
 ```bash
-curl -s "https://aibtc.com/api/inbox/{stx_address}?view=received&limit=20"
+RESPONSE=$(curl -s -w '\n%{http_code}' "https://aibtc.com/api/inbox/{stx_address}?view=received&limit=20")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e . > /dev/null 2>&1 || { echo "Inbox: invalid JSON response"; BODY="{}"; }
+else
+  echo "Inbox fetch failed: HTTP $HTTP_CODE — $BODY"
+  BODY="{}"
+fi
 ```
 
 Filter out messages already in `daemon/processed.json`. Store new messages in a local list.
@@ -157,7 +179,15 @@ Record: `{ event: "github", status: "ok"|"skip"|"fail", agents_scouted: N }`
 Discover other agents on the AIBTC network. This is how you find collaborators, learn from others, and build the network.
 
 ```bash
-curl -s "https://aibtc.com/api/agents?limit=50"
+RESPONSE=$(curl -s -w '\n%{http_code}' "https://aibtc.com/api/agents?limit=50")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e . > /dev/null 2>&1 || { echo "Agent discovery: invalid JSON response"; BODY="[]"; }
+else
+  echo "Agent discovery failed: HTTP $HTTP_CODE — skipping"
+  BODY="[]"
+fi
 ```
 
 For each agent NOT already in `memory/contacts.md`:
@@ -211,8 +241,15 @@ Use Bash/curl instead, with your STX address from CLAUDE.md:
 export MSG_ID="<id>" REPLY_TEXT="<text>" SIG="<base64>"
 PAYLOAD=$(jq -n --arg mid "$MSG_ID" --arg reply "$REPLY_TEXT" --arg sig "$SIG" \
   '{messageId: $mid, reply: $reply, signature: $sig}')
-curl -s -X POST https://aibtc.com/api/outbox/{stx_address} \
-  -H "Content-Type: application/json" -d "$PAYLOAD"
+RESPONSE=$(curl -s -w '\n%{http_code}' -X POST https://aibtc.com/api/outbox/{stx_address} \
+  -H "Content-Type: application/json" -d "$PAYLOAD")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e . > /dev/null 2>&1 && echo "Reply sent OK" || echo "Reply: invalid JSON response"
+else
+  echo "Reply failed: HTTP $HTTP_CODE — $BODY"
+fi
 ```
 
 After replying, add message ID to `daemon/processed.json`.
