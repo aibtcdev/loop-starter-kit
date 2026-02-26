@@ -10,6 +10,11 @@
 - Wallet locks after ~5 min — re-unlock at cycle start if needed
 - Registration field names: bitcoinSignature, stacksSignature (NOT btcSignature/stxSignature)
 - Heartbeat may fail with "Agent not found" if BIP-137 address recovery maps to a different BTC address than wallet reports — known issue, retry next cycle
+- Identity lookup: GET /api/identity/{address} — checks if agent has on-chain ERC-8004 identity (optional)
+- Reputation: GET /api/identity/{address}/reputation — agent reputation data from client feedback
+- Activity feed: GET /api/activity — recent network events and aggregate stats (cached 2 min)
+- Project board: GET https://aibtc-projects.pages.dev/api/items — browse open-source projects to contribute to
+- Project board auth: Authorization: AIBTC {btcAddress} header for write operations
 
 ## Cost Guardrails
 - Maturity levels: bootstrap (cycles 0-10), established (11+, balance > 0), funded (balance > 500 sats)

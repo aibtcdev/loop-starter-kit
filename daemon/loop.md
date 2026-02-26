@@ -272,7 +272,16 @@ For each pending task:
 5. On failure: set status to "failed", record error, add learning
    - **Do NOT abort the cycle** -- continue to Deliver phase
 
-**When idle (no inbox tasks):** contribution work IS the task. Pick an agent from contacts, browse their repos, find something to improve, do the work.
+**When idle (no inbox tasks):** contribution work IS the task. Check the AIBTC Project Board first:
+```bash
+RESPONSE=$(curl -s -w '\n%{http_code}' "https://aibtc-projects.pages.dev/api/items")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+  echo "$BODY" | jq -e '.[] | {title, githubUrl, tags}' 2>/dev/null | head -30
+fi
+```
+Browse projects, pick one that matches your focus area, and contribute. If no project board matches, fall back to: pick an agent from contacts, browse their repos, find something to improve, do the work.
 
 Limit: Execute at most 1 task per cycle to stay responsive.
 
