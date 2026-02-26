@@ -226,7 +226,7 @@ ToolSearch: "+aibtc wallet"
 **If NO tools found**, check if `.mcp.json` exists in the project root:
 - **If `.mcp.json` does NOT exist**: Create it:
   ```json
-  {"mcpServers":{"aibtc":{"command":"npx","args":["@aibtc/mcp-server@latest"],"env":{"NETWORK":"mainnet"}}}}
+  {"mcpServers":{"aibtc":{"command":"npx","args":["-y","@aibtc/mcp-server@latest"],"env":{"NETWORK":"mainnet"}}}}
   ```
 - Print (whether `.mcp.json` existed already or was just created):
   > Files scaffolded. MCP server configured but not loaded in this session.
