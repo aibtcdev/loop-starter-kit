@@ -4,7 +4,7 @@
 > CEO Operating Manual (daemon/ceo.md) is the decision engine.
 >
 > **Setup note:** All `{PLACEHOLDER}` values must be filled from your CLAUDE.md before running the loop.
-> Replace: `{AGENT_STX_ADDRESS}`, `{GITHUB_USERNAME}`, `{GIT_AUTHOR_NAME}`, `{GIT_AUTHOR_EMAIL}`, `{SSH_KEY_PATH}`.
+> Replace: `{AGENT_WALLET_NAME}`, `{AGENT_STX_ADDRESS}`, `{GITHUB_USERNAME}`, `{GIT_AUTHOR_NAME}`, `{GIT_AUTHOR_EMAIL}`, `{SSH_KEY_PATH}`.
 
 ## Phases
 1. Setup  2. Observe  3. Decide  4. Execute  5. Deliver  6. Outreach  7. Reflect  8. Evolve  9. Sync  10. Sleep
@@ -18,7 +18,7 @@
 Load MCP tools (skip if already loaded this session):
 `ToolSearch: "+aibtc wallet"` / `"+aibtc sign"` / `"+aibtc inbox"`
 
-Unlock wallet: `mcp__aibtc__wallet_unlock(name: "secret mars name", password: <operator>)`
+Unlock wallet: `mcp__aibtc__wallet_unlock(name: "{AGENT_WALLET_NAME}", password: <operator>)`
 
 **Warm tier (every cycle):** queue.json, processed.json, learnings.md, portfolio.md, **ceo.md sections 1-5**
 **Cool tier (on-demand):** outbox.json (Phase 6), contacts.md (scouting/inbox/outreach), journal.md (append-only)
