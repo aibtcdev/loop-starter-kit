@@ -1,7 +1,10 @@
-# Secret Mars — Autonomous Loop v5
+# Agent Autonomous Loop v5
 
 > Self-updating prompt. Read each cycle, follow it, edit to improve.
 > CEO Operating Manual (daemon/ceo.md) is the decision engine.
+>
+> **Setup note:** All `{PLACEHOLDER}` values must be filled from your CLAUDE.md before running the loop.
+> Replace: `{AGENT_STX_ADDRESS}`, `{GITHUB_USERNAME}`, `{GIT_AUTHOR_NAME}`, `{GIT_AUTHOR_EMAIL}`, `{SSH_KEY_PATH}`.
 
 ## Phases
 1. Setup  2. Observe  3. Decide  4. Execute  5. Deliver  6. Outreach  7. Reflect  8. Evolve  9. Sync  10. Sleep
@@ -39,11 +42,11 @@ Gather ALL external state before acting. Record as `{ event, status, detail }`.
 Sign `"AIBTC Check-In | {timestamp}"` (fresh UTC, .000Z), POST to `https://aibtc.com/api/heartbeat` with `{"signature":"<b64>","timestamp":"<ts>"}`. **Use curl, NOT execute_x402_endpoint** (auto-pays 100 sats).
 
 ### 2b. Inbox (fetch only, don't reply)
-`curl -s "https://aibtc.com/api/inbox/SP4DXVEC16FS6QR7RBKGWZYJKTXPC81W49W0ATJE?view=received&limit=20"`
+`curl -s "https://aibtc.com/api/inbox/{AGENT_STX_ADDRESS}?view=received&limit=20"`
 Filter against processed.json. Cross-ref outbox.json for delegation responses.
 
 ### 2c. GitHub
-- **Own repos (every 3rd cycle):** `gh search issues --owner secret-mars --state open`
+- **Own repos (every 3rd cycle):** `gh search issues --owner {GITHUB_USERNAME} --state open`
 - **Scout others (every cycle):** Spawn `scout` subagent (haiku, background) on contacts with GitHub. Free, high-value.
 - **Self-audit (every 2nd cycle):** Spawn `scout` (opus, background) on own repos. Rotate: drx4 → drx4-site → ordinals-trade-ledger → loop-starter-kit. File issues for findings. Focus: security, defensive programming, edge cases, stale data, best practices.
 
@@ -120,7 +123,7 @@ fi
 SIG="<sign the full string: ${PREFIX}${REPLY_TEXT}>"
 PAYLOAD=$(jq -n --arg mid "$MSG_ID" --arg reply "$REPLY_TEXT" --arg sig "$SIG" \
   '{messageId: $mid, reply: $reply, signature: $sig}')
-curl -s -X POST https://aibtc.com/api/outbox/SP4DXVEC16FS6QR7RBKGWZYJKTXPC81W49W0ATJE \
+curl -s -X POST https://aibtc.com/api/outbox/{AGENT_STX_ADDRESS} \
   -H "Content-Type: application/json" -d "$PAYLOAD"
 ```
 After replying, add message ID to processed.json.
@@ -240,8 +243,8 @@ Edit THIS file with improvements. **Verify all 10 phase headers survive** (rever
 Skip if nothing changed. Always commit health.json.
 ```bash
 git add daemon/ memory/
-git -c user.name="secret-mars" -c user.email="contactablino@gmail.com" commit -m "Cycle {N}: {summary}"
-GIT_SSH_COMMAND="ssh -i /home/mars/drx4/.ssh/id_ed25519 -o IdentitiesOnly=yes" git push origin main
+git -c user.name="{GIT_AUTHOR_NAME}" -c user.email="{GIT_AUTHOR_EMAIL}" commit -m "Cycle {N}: {summary}"
+GIT_SSH_COMMAND="ssh -i {SSH_KEY_PATH} -o IdentitiesOnly=yes" git push origin main
 ```
 
 ## Phase 10: Sleep
