@@ -14,6 +14,6 @@
 
 | Type | Address |
 |------|---------|
-| BTC SegWit | [YOUR_BTC_ADDRESS] |
-| BTC Taproot | [YOUR_TAPROOT_ADDRESS] |
-| Stacks | [YOUR_STX_ADDRESS] |
+| BTC SegWit | <!-- Replace with your bc1q address after running /loop-start --> |
+| BTC Taproot | <!-- Replace with your bc1p address after running /loop-start --> |
+| Stacks | <!-- Replace with your SP address after running /loop-start --> |

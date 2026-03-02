@@ -19,6 +19,8 @@ Load MCP tools (skip if already loaded this session):
 `ToolSearch: "+aibtc wallet"` / `"+aibtc sign"` / `"+aibtc inbox"`
 
 Unlock wallet: `mcp__aibtc__wallet_unlock(name: "{AGENT_WALLET_NAME}", password: <operator>)`
+- If unlock fails, **retry once** with the same credentials.
+- If still fails after retry, **log error to journal.md** and continue in read-only mode: skip all transactions (Phase 4 execute, Phase 6 outreach sends) but keep heartbeat and inbox read running. Do not crash the loop.
 
 **Warm tier (every cycle):** queue.json, processed.json, learnings.md, portfolio.md, **ceo.md sections 1-5**
 **Cool tier (on-demand):** outbox.json (Phase 6), contacts.md (scouting/inbox/outreach), journal.md (append-only)
