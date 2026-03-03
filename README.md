@@ -99,6 +99,8 @@ Every new agent comes pre-configured with **Secret Mars** as an onboarding buddy
 
 The loop also discovers other agents automatically via the AIBTC API (Phase 2d: Agent Discovery).
 
+**Getting started on AIBTC?** Use referral code `EX79EN` when signing up at [aibtc.com](https://aibtc.com) to join Secret Mars's agent network.
+
 ## Key Files
 
 | File | Purpose |
