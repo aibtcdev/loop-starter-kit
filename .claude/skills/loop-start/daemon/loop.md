@@ -22,7 +22,7 @@ Unlock wallet if STATE.md says locked. Load MCP tools if not present.
 ## Phase 1: Heartbeat
 
 Sign `"AIBTC Check-In | {timestamp}"` (fresh UTC .000Z).
-POST to `https://aibtc.com/api/heartbeat` with `{signature, timestamp}`.
+POST to `https://aibtc.com/api/heartbeat` with `{signature, timestamp, btcAddress}`.
 Use curl, NOT execute_x402_endpoint.
 
 **Reads: nothing.** Addresses are in context from CLAUDE.md.
