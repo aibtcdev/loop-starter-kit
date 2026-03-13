@@ -350,7 +350,7 @@ Register:
 ```bash
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://aibtc.com/api/register \
   -H "Content-Type: application/json" \
-  -d '{"bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>"}')
+  -d '{"btcAddress":"<btc_address>","bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>"}')
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | head -1)
 if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
@@ -414,7 +414,7 @@ POST:
 ```bash
 HB_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://aibtc.com/api/heartbeat \
   -H "Content-Type: application/json" \
-  -d '{"signature":"<base64_sig>","timestamp":"<timestamp>"}')
+  -d '{"btcAddress":"<btc_address>","signature":"<base64_sig>","timestamp":"<timestamp>"}')
 HB_CODE=$(echo "$HB_RESPONSE" | tail -1)
 HB_BODY=$(echo "$HB_RESPONSE" | head -1)
 if [ "$HB_CODE" != "200" ] && [ "$HB_CODE" != "201" ]; then
