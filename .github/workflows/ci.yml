@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate loop-starter-kit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------ #
+      # 1. JSON validity
+      #    Every .json file must parse cleanly. Catches template errors and
+      #    malformed config before they reach agents who clone this kit.
+      # ------------------------------------------------------------------ #
+      - name: Validate JSON files
+        run: |
+          echo "Checking JSON files..."
+          FAILED=0
+          while IFS= read -r -d '' file; do
+            if python3 -m json.tool "$file" > /dev/null 2>&1; then
+              echo "  OK  $file"
+            else
+              echo "  FAIL  $file"
+              python3 -m json.tool "$file" || true
+              FAILED=1
+            fi
+          done < <(find . -name "*.json" -not -path "./.git/*" -print0)
+          if [ "$FAILED" -ne 0 ]; then
+            echo "One or more JSON files failed validation."
+            exit 1
+          fi
+          echo "All JSON files are valid."
+
+      # ------------------------------------------------------------------ #
+      # 2. Required files exist
+      #    These are the load-bearing files every agent loop depends on.
+      #    Missing any of them means the kit is incomplete.
+      # ------------------------------------------------------------------ #
+      - name: Check required files exist
+        run: |
+          echo "Checking required files..."
+          MISSING=0
+          REQUIRED=(
+            "README.md"
+            "daemon/loop.md"
+            "daemon/STATE.md"
+            "daemon/health.json"
+            "daemon/queue.json"
+            "memory/learnings.md"
+          )
+          for f in "${REQUIRED[@]}"; do
+            if [ -f "$f" ]; then
+              echo "  OK  $f"
+            else
+              echo "  MISSING  $f"
+              MISSING=1
+            fi
+          done
+          if [ "$MISSING" -ne 0 ]; then
+            echo "One or more required files are missing."
+            exit 1
+          fi
+          echo "All required files present."
+
+      # ------------------------------------------------------------------ #
+      # 3. Markdown files exist and are non-empty
+      #    Lightweight check: every .md file in the repo should contain
+      #    actual content (not accidentally emptied or truncated).
+      # ------------------------------------------------------------------ #
+      - name: Check Markdown files are non-empty
+        run: |
+          echo "Checking Markdown files..."
+          FAILED=0
+          while IFS= read -r -d '' file; do
+            if [ -s "$file" ]; then
+              echo "  OK  $file"
+            else
+              echo "  EMPTY  $file"
+              FAILED=1
+            fi
+          done < <(find . -name "*.md" -not -path "./.git/*" -print0)
+          if [ "$FAILED" -ne 0 ]; then
+            echo "One or more Markdown files are empty."
+            exit 1
+          fi
+          echo "All Markdown files are non-empty."
+
+      # ------------------------------------------------------------------ #
+      # 4. Placeholder integrity — no filled-in wallet addresses in template
+      #    CLAUDE.md ships as a template. Agent-specific addresses must never
+      #    be committed. This checks that [YOUR_*] placeholders are intact
+      #    and that no real BTC addresses (bc1q.../bc1p...) have been leaked.
+      #
+      #    Note: some STX addresses ARE intentionally hardcoded in the
+      #    template (e.g. the Secret Mars trusted-sender address), so we only
+      #    verify that the agent's own [YOUR_STX_ADDRESS] placeholder exists,
+      #    rather than banning all SP... strings.
+      # ------------------------------------------------------------------ #
+      - name: Check placeholder integrity in CLAUDE.md
+        run: |
+          echo "Checking placeholder integrity in CLAUDE.md..."
+          FAILED=0
+
+          # Required placeholders must still be present
+          for placeholder in \
+            '\[YOUR_BTC_ADDRESS\]' \
+            '\[YOUR_STX_ADDRESS\]' \
+            '\[YOUR_AGENT_NAME\]' \
+            '\[YOUR_WALLET_NAME\]'
+          do
+            if grep -q "$placeholder" CLAUDE.md; then
+              echo "  OK  CLAUDE.md contains $placeholder"
+            else
+              echo "  FAIL  CLAUDE.md is missing $placeholder (was it replaced with a real value?)"
+              FAILED=1
+            fi
+          done
+
+          # Real BTC addresses must NOT appear (native SegWit bc1q or Taproot bc1p)
+          if grep -qE 'bc1[qp][a-z0-9]{38,}' CLAUDE.md; then
+            echo "  FAIL  CLAUDE.md contains what looks like a real BTC address"
+            grep -nE 'bc1[qp][a-z0-9]{38,}' CLAUDE.md || true
+            FAILED=1
+          else
+            echo "  OK  No real BTC addresses found in CLAUDE.md"
+          fi
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "Placeholder integrity check failed."
+            exit 1
+          fi
+          echo "Placeholder integrity check passed."
