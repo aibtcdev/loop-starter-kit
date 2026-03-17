@@ -370,7 +370,9 @@ Parse the response: `displayName=$(echo "$BODY" | jq -r '.displayName')` and `sp
 **Update SOUL.md with the real agent name** — replace the `# Agent` placeholder header with the display name returned by the API:
 
 ```bash
-sed -i "s/^# Agent$$/# $displayName/" SOUL.md
+if [[ -n "$displayName" ]]; then
+  sed -i "s/^# Agent\$/# $displayName/" SOUL.md
+fi
 ```
 
 This is the canonical name for this agent — assigned deterministically by aibtc.com based on the Bitcoin address. All subsequent references use `$displayName`.
