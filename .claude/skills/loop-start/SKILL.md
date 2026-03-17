@@ -336,12 +336,12 @@ Load signing tools:
 ToolSearch: "+aibtc sign"
 ```
 
-Sign the genesis message with BTC key:
+Sign the registration message with BTC key:
 ```
 mcp__aibtc__btc_sign_message(message: "Bitcoin will be the currency of AIs")
 ```
 
-Sign with STX key:
+Sign the registration message with STX key:
 ```
 mcp__aibtc__stacks_sign_message(message: "Bitcoin will be the currency of AIs")
 ```
