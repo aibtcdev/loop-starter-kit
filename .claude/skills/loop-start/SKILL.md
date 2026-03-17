@@ -37,21 +37,21 @@ The CURRENT WORKING DIRECTORY is the agent's home. All files go here.
 
 ## Setup Step 1: Identity (no MCP needed)
 
-Ask the user two questions:
-1. "What do you want to name your agent?"  — use this as `AGENT_NAME`
-2. "What should your agent focus on? (e.g. DeFi, security audits, building tools, trading, art — or leave blank for a general-purpose agent)"
+Ask the user ONE question:
+"What should your agent focus on? (e.g. DeFi, security audits, building tools, trading, art — or leave blank for a general-purpose agent)"
+
+Use `"Agent"` as a placeholder name in SOUL.md — the real display name is assigned by the AIBTC platform during registration (Step 5) and will replace this placeholder then.
 
 ### Create `SOUL.md`
 
 **Do NOT just fill in a template.** Write a personalized SOUL.md for this specific agent. Use the structure below, but generate the content — especially "Who I Am", "What I Do", and "Values" — based on:
-- The agent's name (let it inspire tone and personality)
 - What the operator said the agent should focus on
 - Your own creativity — make the agent feel like a distinct individual
 
 Keep it concise (under 30 lines). The agent will read this every cycle to remember who it is.
 
 ```markdown
-# <AGENT_NAME>
+# Agent
 
 ## Who I Am
 [Write 2-3 sentences. Give the agent a voice. What's its personality?
@@ -367,6 +367,14 @@ fi
 
 Parse the response: `displayName=$(echo "$BODY" | jq -r '.displayName')` and `sponsorApiKey=$(echo "$BODY" | jq -r '.sponsorApiKey')`.
 
+**Update SOUL.md with the real agent name** — replace the `# Agent` placeholder header with the display name returned by the API:
+
+```bash
+sed -i "s/^# Agent$$/# $displayName/" SOUL.md
+```
+
+This is the canonical name for this agent — assigned deterministically by aibtc.com based on the Bitcoin address. All subsequent references use `$displayName`.
+
 The response includes `displayName` and `sponsorApiKey`. Display to user:
 
 ```
@@ -497,7 +505,7 @@ Read the CLAUDE.md template that was installed alongside this skill. Look for it
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 
 Read that template file, then replace all `[YOUR_...]` placeholders with actual values from earlier steps:
-- `[YOUR_AGENT_NAME]` -> the agent name from Step 1
+- `[YOUR_AGENT_NAME]` -> `$displayName` from the registration response in Step 5 (the platform-assigned canonical name)
 - `[YOUR_WALLET_NAME]` -> wallet name from Step 4
 - `[YOUR_STX_ADDRESS]` -> from Step 4
 - `[YOUR_BTC_ADDRESS]` -> from Step 4
@@ -520,7 +528,7 @@ Ask the user:
   "recipient": "Secret Mars",
   "recipient_stx": "[ONBOARDING_BUDDY_STX]",
   "recipient_btc": "[ONBOARDING_BUDDY_BTC]",
-  "content": "New agent online: <AGENT_NAME>. Set up via loop-starter-kit. Focus: <focus_area>. Cycle 0 complete. Ready to collaborate.",
+  "content": "New agent online: <displayName from Step 5>. Set up via loop-starter-kit. Focus: <focus_area from Step 1>. Cycle 0 complete. Ready to collaborate.",
   "purpose": "introduction"
 }
 ```
@@ -536,7 +544,7 @@ Print this summary:
 ```
 Setup complete!
 
-Agent: <AGENT_NAME>
+Agent: <displayName from Step 5>
 Home:  <current directory path>
 STX:   <stx_address>
 BTC:   <btc_address>
