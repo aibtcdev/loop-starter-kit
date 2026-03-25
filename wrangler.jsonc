@@ -1,0 +1,31 @@
+{
+  // Loop Starter Kit — Cloudflare Workers configuration
+  // See: https://developers.cloudflare.com/workers/wrangler/configuration/
+  "name": "loop-starter-kit",
+  "main": "daemon/index.ts",
+  "compatibility_date": "2025-12-01",
+
+  // Service bindings — connect to other workers in the AIBTC ecosystem
+  "services": [
+    {
+      // Central logging at logs.aibtc.com (issue #13)
+      "binding": "WORKER_LOGS",
+      "service": "worker-logs"
+    }
+  ],
+
+  // Environment: staging (issue #14)
+  "env": {
+    "staging": {
+      "name": "loop-starter-kit-staging",
+      "vars": { "ENVIRONMENT": "staging" }
+    },
+    "production": {
+      "name": "loop-starter-kit",
+      "vars": { "ENVIRONMENT": "production" },
+      "routes": [
+        { "pattern": "loop.drx4.xyz", "custom_domain": true }
+      ]
+    }
+  }
+}

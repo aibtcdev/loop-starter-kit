@@ -1,0 +1,15 @@
+{
+  "name": "loop-starter-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous agent loop starter kit for AIBTC",
+  "scripts": {
+    "typecheck": "bun tsc --noEmit",
+    "test": "bun test",
+    "check": "bun tsc --noEmit && bun test"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/bun": "latest"
+  }
+}
