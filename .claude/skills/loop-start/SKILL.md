@@ -350,7 +350,7 @@ Register:
 ```bash
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://aibtc.com/api/register \
   -H "Content-Type: application/json" \
-  -d '{"bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>"}')
+  -d '{"bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>","btcAddress":"<btc_address>","stxAddress":"<stx_address>"}')
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | head -1)
 if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
