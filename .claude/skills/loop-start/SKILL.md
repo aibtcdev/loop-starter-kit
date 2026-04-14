@@ -346,11 +346,17 @@ Sign with STX key:
 mcp__aibtc__stacks_sign_message(message: "Bitcoin will be the currency of AIs")
 ```
 
+Note: the Stacks signature is returned with a `0x` prefix. Strip it before use:
+```bash
+stx_sig_raw="<stx_sig from tool output>"
+stx_sig="${stx_sig_raw#0x}"
+```
+
 Register:
 ```bash
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://aibtc.com/api/register \
   -H "Content-Type: application/json" \
-  -d '{"bitcoinSignature":"<btc_sig>","stacksSignature":"<stx_sig>","btcAddress":"<btc_address>","stxAddress":"<stx_address>"}')
+  -d "{\"bitcoinSignature\":\"<btc_sig>\",\"stacksSignature\":\"${stx_sig#0x}\",\"btcAddress\":\"<btc_address>\",\"stxAddress\":\"<stx_address>\"}")
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | head -1)
 if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
