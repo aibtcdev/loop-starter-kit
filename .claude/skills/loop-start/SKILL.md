@@ -109,6 +109,12 @@ Copy the template as-is to `daemon/loop.md`. **No placeholder replacement needed
 {"cycle":0,"timestamp":"2000-01-01T00:00:00.000Z","status":"init","maturity_level":"bootstrap","phases":{"heartbeat":"skip","inbox":"skip","execute":"idle","deliver":"idle","outreach":"idle"},"stats":{"new_messages":0,"tasks_executed":0,"tasks_pending":0,"replies_sent":0,"outreach_sent":0,"outreach_cost_sats":0,"idle_cycles_count":0},"circuit_breaker":{},"last_discovery_date":"","next_cycle_at":"2000-01-01T00:00:00.000Z"}
 ```
 
+
+**`daemon/bridge-state.json`** — Auto-bridge state (required by Phase 2d):
+```json
+{"in_flight":false,"txid":null,"amount_sats":0,"started_at":null,"last_status":"idle"}
+```
+
 **`daemon/queue.json`**:
 ```json
 {"tasks":[],"next_id":1}
