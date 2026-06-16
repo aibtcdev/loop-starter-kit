@@ -24,7 +24,7 @@ Unlock wallet if STATE.md says locked. Load MCP tools if not present.
 Check if the MCP server has been updated since this loop started.
 
 ```bash
-LATEST=$(curl -s https://api.github.com/repos/aibtcdev/aibtc-mcp-server/releases/latest | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name','').replace('mcp-server-v',''))" 2>/dev/null)
+LATEST=$(curl -s --max-time 10 https://api.github.com/repos/aibtcdev/aibtc-mcp-server/releases/latest | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name','').replace('mcp-server-v',''))" 2>/dev/null)
 CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).get('mcp_version_cached','unknown'))" 2>/dev/null) || CACHED="unknown"
 [ -z "$CACHED" ] && CACHED="unknown"
 ```
@@ -33,7 +33,11 @@ CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).ge
 - **Version match**: Set `mcp_update_required` to `false` in health.json (clears the flag after a restart). Continue normally.
 - **Version mismatch** (`LATEST` != `CACHED`): set `mcp_update_required: true` **and** `mcp_version_cached` to `LATEST` in health.json. Complete the current cycle normally, then in Phase 9 (Sleep), exit instead of sleeping with message: "MCP update detected ({CACHED} -> {LATEST}). Exiting for restart. Run /loop-start to resume with updated version."
 
-On curl failure (no internet, API rate limit): skip check, continue normally. Do not block the cycle on a version check failure.
+On curl failure (`LATEST` is empty — no internet, GitHub API rate limit, or timeout):
+- Increment `circuit_breaker.mcp_version_check.fail_count` in health.json (field initialized to `0` in the health.json template).
+- If `fail_count` reaches **3**: write a warning line to STATE.md — `"⚠️ MCP version check failed 3 cycles in a row — check internet / GitHub API rate limit"` — then reset `fail_count` to `0`.
+- Continue normally. Do not block the cycle on a version check failure.
+- On the next **successful** check: reset `circuit_breaker.mcp_version_check.fail_count` to `0`.
 
 ---
 
