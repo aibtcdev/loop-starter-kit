@@ -24,7 +24,7 @@ Unlock wallet if STATE.md says locked. Load MCP tools if not present.
 Check if the MCP server has been updated since this loop started.
 
 ```bash
-LATEST=$(curl -s https://api.github.com/repos/aibtcdev/aibtc-mcp-server/releases/latest | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name','').replace('mcp-server-v',''))" 2>/dev/null)
+LATEST=$(curl -s --max-time 10 https://api.github.com/repos/aibtcdev/aibtc-mcp-server/releases/latest | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name','').replace('mcp-server-v',''))" 2>/dev/null)
 CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).get('mcp_version_cached','unknown'))" 2>/dev/null) || CACHED="unknown"
 [ -z "$CACHED" ] && CACHED="unknown"
 ```
@@ -33,7 +33,12 @@ CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).ge
 - **Version match**: Set `mcp_update_required` to `false` in health.json (clears the flag after a restart). Continue normally.
 - **Version mismatch** (`LATEST` != `CACHED`): set `mcp_update_required: true` **and** `mcp_version_cached` to `LATEST` in health.json. Complete the current cycle normally, then in Phase 9 (Sleep), exit instead of sleeping with message: "MCP update detected ({CACHED} -> {LATEST}). Exiting for restart. Run /loop-start to resume with updated version."
 
-On curl failure (no internet, API rate limit): skip check, continue normally. Do not block the cycle on a version check failure.
+On empty `LATEST` (curl failure, GitHub API rate limit, timeout, or degraded API response returning no `tag_name`):
+- Read `circuit_breaker.mcp_version_check.fail_count` from health.json. If the field is missing (agent initialized health.json before this field was added), treat it as `0` and initialize it to `0` before incrementing.
+- Increment `fail_count` by 1 and write it back to health.json.
+- If `fail_count` reaches **3**: write a timestamped warning line to STATE.md — `"{TIMESTAMP} ⚠️ MCP version check failed 3 cycles in a row — check internet / GitHub API rate limit"` (where `TIMESTAMP` is the current UTC ISO-8601 timestamp, e.g. `2026-06-16T15:45:29Z`) — then reset `fail_count` to `0`.
+- Continue normally. Do not block the cycle on a version check failure.
+- On the next **successful** check (non-empty `LATEST`): reset `circuit_breaker.mcp_version_check.fail_count` to `0`.
 
 ---
 
