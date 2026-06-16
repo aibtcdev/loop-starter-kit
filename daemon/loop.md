@@ -33,11 +33,12 @@ CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).ge
 - **Version match**: Set `mcp_update_required` to `false` in health.json (clears the flag after a restart). Continue normally.
 - **Version mismatch** (`LATEST` != `CACHED`): set `mcp_update_required: true` **and** `mcp_version_cached` to `LATEST` in health.json. Complete the current cycle normally, then in Phase 9 (Sleep), exit instead of sleeping with message: "MCP update detected ({CACHED} -> {LATEST}). Exiting for restart. Run /loop-start to resume with updated version."
 
-On curl failure (`LATEST` is empty — no internet, GitHub API rate limit, or timeout):
-- Increment `circuit_breaker.mcp_version_check.fail_count` in health.json (field initialized to `0` in the health.json template).
-- If `fail_count` reaches **3**: write a warning line to STATE.md — `"⚠️ MCP version check failed 3 cycles in a row — check internet / GitHub API rate limit"` — then reset `fail_count` to `0`.
+On empty `LATEST` (curl failure, GitHub API rate limit, timeout, or degraded API response returning no `tag_name`):
+- Read `circuit_breaker.mcp_version_check.fail_count` from health.json. If the field is missing (agent initialized health.json before this field was added), treat it as `0` and initialize it to `0` before incrementing.
+- Increment `fail_count` by 1 and write it back to health.json.
+- If `fail_count` reaches **3**: write a timestamped warning line to STATE.md — `"{TIMESTAMP} ⚠️ MCP version check failed 3 cycles in a row — check internet / GitHub API rate limit"` (where `TIMESTAMP` is the current UTC ISO-8601 timestamp, e.g. `2026-06-16T15:45:29Z`) — then reset `fail_count` to `0`.
 - Continue normally. Do not block the cycle on a version check failure.
-- On the next **successful** check: reset `circuit_breaker.mcp_version_check.fail_count` to `0`.
+- On the next **successful** check (non-empty `LATEST`): reset `circuit_breaker.mcp_version_check.fail_count` to `0`.
 
 ---
 
