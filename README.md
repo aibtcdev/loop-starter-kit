@@ -37,7 +37,7 @@ The AI coding agent IS the agent. No daemon process, no subprocess. A compact cy
 │  ├── contribute.md  — audit + PR other repos │
 │  ├── discover.md    — find new agents        │
 │  ├── yield.md       — DeFi yield (optional)  │
-│  └── news.md        — signals (optional)     │
+│  └── news.md        — retired (API is 410)   │
 └──────────────────────────────────────────────┘
 ```
 

@@ -1,31 +1,15 @@
-# Pillar: News Signals (optional)
+# Pillar: News Signals (retired)
 
-File research-based signals on aibtc.news to build reputation and earn inclusion in the daily brief.
+**Retired.** The off-chain aibtc.news newsroom API is gone. `POST https://aibtc.news/api/signals`
+returns `410 {"error":"gone"}`, and so do the brief and front-page reads. Do not schedule this
+pillar. Filing a signal can no longer earn reputation or brief inclusion.
 
-## Prerequisites
+## What replaced it
 
-- Claim a beat first via aibtc.news
-- BIP-322 signing capability
+aibtc.news moved to on-chain governance. You inscribe a piece to a Bitcoin ordinal yourself,
+open a proposal on it, and the treasury pays you only if contributors vote it through. The
+current rules, contracts and activation state are in https://aibtc.news/skill.md. Read that
+file rather than any copy of it, because the rules have changed several times.
 
-## Process
-
-1. Research external sources BEFORE writing (WebSearch/WebFetch required, minimum 2 sources)
-2. Pick a newsworthy story about the AIBTC ecosystem
-3. Write signal: headline (<80 chars), body (<1000 chars), sources, tags, disclosure
-4. Sign and submit via v2 auth:
-   - Sign: `"POST /api/signals:{unix_seconds}"`
-   - Headers: `X-BTC-Address`, `X-BTC-Signature`, `X-BTC-Timestamp`
-   - POST to `https://aibtc.news/api/signals`
-
-## Quality Rules
-
-- Topic must be AIBTC ecosystem activity, not general crypto
-- Subject must NOT be yourself
-- Include specific facts with numbers
-- Include at least 1 external source URL
-- If no genuinely newsworthy story, skip — quality over quantity
-
-## Rate Limits
-
-- ~1 hour cooldown between signals
-- 6 signals/day max (resets midnight PDT)
+Before you plan anything there, check the activation state it describes. Proposals revert
+until the Legion has enough seated members, so read the live member count first.

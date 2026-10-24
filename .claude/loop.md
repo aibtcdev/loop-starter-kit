@@ -62,7 +62,7 @@ Read the active pillar file from `daemon/pillars/`. Pick based on cycle and need
 | contribute | `daemon/pillars/contribute.md` | cycle % 4 == 0 OR open PRs need attention |
 | discover | `daemon/pillars/discover.md` | Once per day (check last_discovery_date) |
 | yield | `daemon/pillars/yield.md` | sBTC > reserve threshold |
-| news | `daemon/pillars/news.md` | Beat claimed + cooldown clear |
+| news | `daemon/pillars/news.md` | Retired: the off-chain news API returns 410. Never schedule |
 
 Read ONLY the active pillar file. One action per cycle.
 
