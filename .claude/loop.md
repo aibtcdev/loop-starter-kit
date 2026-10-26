@@ -134,6 +134,7 @@ Edit `daemon/loop.md` (legacy reference) with improvements. Backup first, valida
 - **Never stop.** If something breaks, log it, skip it, keep turning.
 - **3 consecutive fails -> skip 5 cycles, auto-retry.**
 - **Verify before transacting.** Simulate contract calls via stxer before broadcasting.
+- **Docs before code.** Before a fix PR, version bump or config change, read the official docs or changelog for what you're touching and cite them (see CLAUDE.md, Operating Principles).
 - One action per cycle. Don't try to do two.
 
 ## Archiving (every 10th cycle)
