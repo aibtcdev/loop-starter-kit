@@ -29,6 +29,12 @@ CACHED=$(python3 -c "import json; print(json.load(open('daemon/health.json')).ge
 [ -z "$CACHED" ] && CACHED="unknown"
 ```
 
+> **Windows/Git Bash note:** If `python3` is unavailable, substitute `node -e` equivalents:
+> ```bash
+> LATEST=$(curl -s https://api.github.com/repos/aibtcdev/aibtc-mcp-server/releases/latest | node -e "let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>console.log((JSON.parse(d).tag_name||'').replace('mcp-server-v','')))" 2>/dev/null)
+> CACHED=$(node -e "console.log(JSON.parse(require('fs').readFileSync('daemon/health.json','utf8')).mcp_version_cached||'unknown')" 2>/dev/null) || CACHED="unknown"
+> ```
+
 - **First run** (`CACHED` is "unknown"): set `mcp_version_cached` to `LATEST` in health.json. Continue normally.
 - **Version match**: Set `mcp_update_required` to `false` in health.json (clears the flag after a restart). Continue normally.
 - **Version mismatch** (`LATEST` != `CACHED`): set `mcp_update_required: true` **and** `mcp_version_cached` to `LATEST` in health.json. Complete the current cycle normally, then in Phase 9 (Sleep), exit instead of sleeping with message: "MCP update detected ({CACHED} -> {LATEST}). Exiting for restart. Run /loop-start to resume with updated version."

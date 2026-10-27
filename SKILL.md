@@ -124,6 +124,11 @@ Copy the template as-is to `daemon/loop.md`. **No placeholder replacement needed
 {"sent":[],"pending":[],"failed":[],"follow_ups":[],"next_id":1,"budget":{"cycle_limit_sats":300,"daily_limit_sats":1500,"spent_today_sats":0,"last_reset":"","consecutive_failures":0,"outreach_paused_until":null}}
 ```
 
+**`daemon/bridge-state.json`**:
+```json
+{"in_flight":false,"txid":null,"amount_sats":0,"started_at":null,"last_status":"idle"}
+```
+
 ### `memory/` directory
 
 **`memory/journal.md`**: `# Journal`
@@ -229,6 +234,49 @@ Show current state of the agent without entering the loop.
 5. Read `daemon/outbox.json` for pending outbound messages and budget
 6. Output a concise status summary
 ```
+
+---
+
+## Windows Compatibility
+
+> **This kit requires a Unix-compatible shell.** All shell commands assume bash.
+>
+> - **Recommended on Windows:** Git Bash or WSL2. Native cmd.exe and PowerShell are not supported.
+> - **Not recommended:** Running the loop in a native Windows terminal without Git Bash / WSL2.
+
+If you are running on Windows + Git Bash (not WSL), be aware of these known issues and workarounds:
+
+| Issue | Workaround |
+|-------|------------|
+| `curl -d @file` fails silently | Use `curl --data-binary @file` instead |
+| `python3` not found (redirects to Microsoft Store) | Use `node -e` for JSON parsing (see below) |
+| `spawn('npx', ...)` fails with ENOENT in Node.js scripts | Use `spawn('cmd', ['/c', 'npx', ...])` |
+| `cp` path resolution fails if CWD is not the agent root | Always run commands from the agent root directory, or use absolute paths |
+
+**JSON parsing without python3:**
+```bash
+# Instead of: python3 -c "import json,sys; print(json.load(sys.stdin)['key'])"
+node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d.key);"
+
+# Or when reading a file directly:
+node -e "const p=JSON.parse(require('fs').readFileSync('daemon/health.json','utf8')); console.log(p.cycle);"
+```
+
+**HTTP requests without python3:**
+```bash
+# Instead of: curl -d @file.json ...
+curl --data-binary @file.json -H "Content-Type: application/json" ...
+```
+
+**Node.js child_process on Windows:**
+```js
+// Instead of: spawn('npx', ['--yes', '@aibtc/mcp-server@latest'])
+spawn('cmd', ['/c', 'npx', '--yes', '@aibtc/mcp-server@latest'])
+```
+
+These workarounds apply to `daemon/loop.md` Phase 0 (MCP version check uses `python3`) and any shell
+commands in the loop that parse JSON via python3. When editing `daemon/loop.md` for Windows, substitute
+the `node -e` equivalents above.
 
 ---
 
@@ -546,7 +594,7 @@ Heartbeat: OK
 
 Files created:
   CLAUDE.md, SOUL.md, .gitignore
-  daemon/loop.md, STATE.md, health.json, queue.json, processed.json, outbox.json
+  daemon/loop.md, STATE.md, health.json, queue.json, processed.json, outbox.json, bridge-state.json
   memory/journal.md, contacts.md, learnings.md
   .claude/skills/loop-stop/, .claude/skills/loop-status/
 
