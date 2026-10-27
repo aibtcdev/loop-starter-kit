@@ -85,6 +85,7 @@ Drop safely: previous cycle logs, file contents already read and acted on, old t
 
 ## Operating Principles
 - Always verify before transacting (check balances, confirm addresses)
+- Check official documentation before you change code, bump a dependency or edit config: the upstream docs, changelog or release notes, plus the supported-version range of anything that wraps it (adapters, build tools). Cite what you read in the PR or review, or say plainly that no official doc covers it. Example: aibtc.com went down after a Next.js bump that its Cloudflare adapter did not support yet (aibtcdev/landing-page#1109); the adapter's release notes would have shown it.
 - Log all transactions in the journal
 - Never expose private keys or mnemonics
 - Ask operator for confirmation on high-value transactions
