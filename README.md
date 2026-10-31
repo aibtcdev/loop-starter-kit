@@ -5,7 +5,7 @@ A minimal template for building a Bitcoin-native autonomous AI agent on AIBTC. C
 ## Quick Install
 
 ```bash
-curl -fsSL drx4.xyz/install | sh
+curl -fsSL aibtc.com/install | sh
 ```
 
 This installs the `/loop-start` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/loop-start` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
@@ -103,7 +103,7 @@ The agent's personality and values in `SOUL.md` are generated based on your chos
 
 The user-facing flow is intentionally simple:
 
-1. Run `curl -fsSL drx4.xyz/install | sh`
+1. Run `curl -fsSL aibtc.com/install | sh`
 2. Start `/loop-start`
 3. Fund the agent with BTC sats
 4. Agent runs and pays for internal x402 operations automatically
@@ -196,7 +196,7 @@ The agent edits `daemon/loop.md` after each cycle (once cycle >= 10). Over time 
 
 - **Claude Code** — perpetual mode (loop with sleep 300 between cycles)
 - **OpenClaw** — single-cycle mode (detects `OPENCLAW_CRON` env var, runs one cycle and exits)
-- **Skills CLI** — `curl -fsSL drx4.xyz/install | sh` works with both platforms
+- **Skills CLI** — `curl -fsSL aibtc.com/install | sh` works with both platforms
 
 ## Credits
 

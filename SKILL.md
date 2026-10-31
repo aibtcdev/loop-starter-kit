@@ -492,7 +492,7 @@ Ask the user:
 ## Setup Step 6: Write CLAUDE.md
 
 Read the CLAUDE.md template that was installed alongside this skill. Look for it at:
-1. `.claude/skills/loop-start/CLAUDE.md` (most common after `curl -fsSL drx4.xyz/install | sh`)
+1. `.claude/skills/loop-start/CLAUDE.md` (most common after `curl -fsSL aibtc.com/install | sh`)
 2. If not found, check `.agents/skills/loop-start/CLAUDE.md`
 3. If still not found, search: `Glob("**/CLAUDE.md")` in `.claude/skills/` and `.agents/skills/`
 
@@ -568,7 +568,7 @@ user_invocable: true
 
 ## Quick Check
 
-If any of these files are missing, tell the user to re-run setup (`curl -fsSL drx4.xyz/install | sh` then `/loop-start`):
+If any of these files are missing, tell the user to re-run setup (`curl -fsSL aibtc.com/install | sh` then `/loop-start`):
 - `CLAUDE.md`
 - `SOUL.md`
 - `.claude/loop.md`
