@@ -19,7 +19,11 @@
     "outreach_cost_sats": 0,
     "idle_cycles_count": 0
   },
-  "circuit_breaker": {},
+  "circuit_breaker": {
+    "mcp_version_check": {
+      "fail_count": 0
+    }
+  },
   "last_discovery_date": "",
   "next_cycle_at": "2000-01-01T00:00:00.000Z"
 }
