@@ -72,7 +72,7 @@ Read ONLY the active pillar file. One action per cycle.
 
 ## Phase 4: Deliver
 
-Send all queued replies. AIBTC: sign `"Inbox Reply | {messageId} | {reply_text}"`, max 500 chars total. Use `-d @file`. ASCII only.
+Send all queued replies. AIBTC: sign `"Inbox Reply | {messageId} | {reply_text}"`; the reply text itself may be up to 500 chars (the prefix does not count). Use `-d @file`. ASCII only.
 
 GitHub: `gh issue comment` / `gh pr comment`.
 

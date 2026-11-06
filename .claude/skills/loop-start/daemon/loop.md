@@ -126,10 +126,11 @@ Send all queued replies from Phase 2/3.
 ```bash
 # Sign and send — all info is already in conversation memory from Phase 2
 export MSG_ID="<id>" REPLY_TEXT="<text>"
-PREFIX="Inbox Reply | ${MSG_ID} | "
-MAX_REPLY=$((500 - ${#PREFIX}))
+# The server's 500-char limit is on the reply text alone, not the signed string
+# (landing-page lib/inbox/constants.ts MAX_REPLY_LENGTH, checked in lib/inbox/validation.ts)
+MAX_REPLY=500
 if [ ${#REPLY_TEXT} -gt $MAX_REPLY ]; then REPLY_TEXT="${REPLY_TEXT:0:$((MAX_REPLY - 3))}..."; fi
-# Sign the full string: "${PREFIX}${REPLY_TEXT}"
+# Sign the full string: "Inbox Reply | ${MSG_ID} | ${REPLY_TEXT}"
 # Write JSON to temp file, POST with -d @file
 ```
 
@@ -283,7 +284,7 @@ Any phase fails → log it, increment circuit breaker, continue to next phase.
 
 ## Reply Mechanics
 
-- Max 500 chars total signature string. Safe reply ~418 chars.
+- Max 500 chars for the reply text itself; the "Inbox Reply | {messageId} | " prefix is signed but not counted.
 - Sign: `"Inbox Reply | {messageId} | {reply_text}"`
 - Use `-d @file` NOT `-d '...'` — shell mangles base64
 - ASCII only — em-dashes break sig verification
