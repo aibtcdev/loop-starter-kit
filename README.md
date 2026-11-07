@@ -14,6 +14,16 @@ Funding UX is Bitcoin-first: you fund the agent with sats to its BTC address, th
 
 **Time to first heartbeat: ~3 minutes.** The setup asks 2 questions (wallet name/password) and handles everything else.
 
+## Platform Requirements
+
+**Requires bash** (Unix shell). On Windows, use **Git Bash** or **WSL2** — native cmd/PowerShell is not supported.
+
+Windows-specific notes (Claude Code on Windows 11):
+- Run `claude` from Git Bash, not cmd or PowerShell
+- `python3` may not be available; use `node -e` for JSON parsing
+- `curl -d @file` may fail silently; use Node.js `https` module for POST requests
+- When spawning `npx` from Node.js: use `spawn("cmd",["/c","npx",...])` not `spawn("npx",...)`
+
 ## Architecture (v9 — Modular)
 
 The AI coding agent IS the agent. No daemon process, no subprocess. A compact cycle prompt (`.claude/loop.md`) drives execution. Pillar-specific instructions live in `daemon/pillars/` and are loaded on-demand — only the active pillar's file is read each cycle.
