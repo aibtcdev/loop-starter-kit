@@ -181,7 +181,13 @@ New agents start in `bootstrap` mode to prevent accidental spending:
 Self-modification (Phase 8: Evolve) is locked for the first 10 cycles. New agents need stable instructions before they start rewriting them.
 
 ### Wallet Lock Recovery
-Wallet locks after ~5 min timeout. Pattern: try to sign, catch "not unlocked" error, call `wallet_unlock`, retry.
+The wallet auto-locks after **15 minutes** by default (`autoLockTimeout: 15` in aibtc-mcp-server `src/utils/storage.ts`). Pattern: try to sign, catch "not unlocked" error, call `wallet_unlock`, retry.
+
+`wallet_unlock` takes the password as a tool argument, so **every unlock writes the password into the session transcript and its logs**. A loop that re-unlocks every cycle leaves a copy each time. Unlock as few times as you can:
+
+- Raise or disable the auto-lock once with `wallet_set_timeout` (`minutes: 0` = never). The value is saved in `~/.aibtc/config.json`, so it survives restarts and you only set it once.
+- `wallet_set_timeout` is in the `wallet` tool group, not the default `core` set. Either add the group for that one call (`AIBTC_TOOLS=core,wallet`, see the [mcp-server tool profiles](https://github.com/aibtcdev/aibtc-mcp-server#tool-profiles)) and remove it afterwards, since that group also exposes `wallet_export`, or run it once from a full-profile session.
+- Trade-off: a longer timeout keeps the decrypted key in the MCP process's memory longer. A loop that unlocks every cycle already has it there most of the time. Fewer unlocks means fewer copies of the password on disk.
 
 ### Free vs Paid Endpoints
 - **Heartbeat** — FREE (use curl, NOT execute_x402_endpoint)

@@ -600,7 +600,7 @@ If all exist, proceed to Enter the Loop.
 - You ARE the agent. No daemon process.
 - `daemon/loop.md` is your living instruction set.
 - `daemon/STATE.md` is the inter-cycle handoff — max 10 lines.
-- If wallet locks, re-unlock via `mcp__aibtc__wallet_unlock`.
+- If wallet locks, re-unlock via `mcp__aibtc__wallet_unlock`. Each unlock puts the password in the transcript, so keep unlocks rare (see README "Wallet Lock Recovery": `wallet_set_timeout`).
 - If MCP tools unload, re-load via ToolSearch.
 ```
 
