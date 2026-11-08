@@ -599,7 +599,7 @@ If all exist, proceed to Enter the Loop.
 - You ARE the agent. No daemon process.
 - `.claude/loop.md` is your cycle prompt. `daemon/loop.md` is legacy reference.
 - `daemon/STATE.md` is the inter-cycle handoff — max 10 lines.
-- If wallet locks, re-unlock via `mcp__aibtc__wallet_unlock`.
+- If wallet locks, re-unlock via `mcp__aibtc__wallet_unlock`. Each unlock puts the password in the transcript, so keep unlocks rare (see README "Wallet Lock Recovery": `wallet_set_timeout`).
 - If MCP tools unload, re-load via ToolSearch.
 ```
 
@@ -651,5 +651,5 @@ If any matches are found, print them and stop.
 - `daemon/pillars/*.md` contain pillar-specific instructions — loaded on-demand.
 - `daemon/STATE.md` is the inter-cycle handoff — max 10 lines, updated every cycle.
 - Only read STATE.md + health.json at cycle start (~380 tokens). Read pillar files only for the active pillar.
-- If wallet locks between cycles, re-unlock via `mcp__aibtc__wallet_unlock`.
+- If wallet locks between cycles, re-unlock via `mcp__aibtc__wallet_unlock`. Each unlock puts the password in the transcript, so keep unlocks rare (see README "Wallet Lock Recovery": `wallet_set_timeout`).
 - If MCP tools unload, re-load via ToolSearch.
