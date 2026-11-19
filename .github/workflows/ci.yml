@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          required_files=(
+            "CLAUDE.md"
+            "SOUL.md"
+            "SKILL.md"
+            "README.md"
+            "daemon/loop.md"
+            "daemon/health.json"
+            "daemon/queue.json"
+            "daemon/processed.json"
+            "daemon/outbox.json"
+            "memory/journal.md"
+            "memory/contacts.md"
+            "memory/learnings.md"
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              missing=$((missing + 1))
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "Error: $missing required file(s) missing from starter kit."
+            exit 1
+          fi
+
+      - name: Validate health.json is valid JSON
+        run: |
+          python3 -c "import json, sys; json.load(open('daemon/health.json'))" \
+            && echo "OK: daemon/health.json is valid JSON" \
+            || (echo "Error: daemon/health.json is not valid JSON" && exit 1)
+
+      - name: Validate queue.json is valid JSON
+        run: |
+          python3 -c "import json, sys; json.load(open('daemon/queue.json'))" \
+            && echo "OK: daemon/queue.json is valid JSON" \
+            || (echo "Error: daemon/queue.json is not valid JSON" && exit 1)
+
+      - name: Validate processed.json is valid JSON
+        run: |
+          python3 -c "import json, sys; json.load(open('daemon/processed.json'))" \
+            && echo "OK: daemon/processed.json is valid JSON" \
+            || (echo "Error: daemon/processed.json is not valid JSON" && exit 1)
+
+      - name: Validate outbox.json is valid JSON
+        run: |
+          python3 -c "import json, sys; json.load(open('daemon/outbox.json'))" \
+            && echo "OK: daemon/outbox.json is valid JSON" \
+            || (echo "Error: daemon/outbox.json is not valid JSON" && exit 1)
+
+      - name: Check CLAUDE.md has required sections
+        run: |
+          required_sections=(
+            "## Identity"
+            "## Default Wallet"
+            "## GitHub"
+          )
+          missing=0
+          for section in "${required_sections[@]}"; do
+            if ! grep -qF "$section" CLAUDE.md; then
+              echo "MISSING section in CLAUDE.md: $section"
+              missing=$((missing + 1))
+            else
+              echo "OK: $section"
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "Error: $missing required section(s) missing from CLAUDE.md."
+            exit 1
+          fi
+
+      - name: Check daemon/loop.md has required phases
+        run: |
+          required_phases=(
+            "heartbeat"
+            "inbox"
+            "health"
+          )
+          missing=0
+          for phase in "${required_phases[@]}"; do
+            if ! grep -qi "$phase" daemon/loop.md; then
+              echo "MISSING phase reference in daemon/loop.md: $phase"
+              missing=$((missing + 1))
+            else
+              echo "OK: phase '$phase' referenced"
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "Error: $missing required phase(s) missing from daemon/loop.md."
+            exit 1
+          fi
